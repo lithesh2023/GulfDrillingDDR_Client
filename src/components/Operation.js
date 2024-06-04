@@ -7,7 +7,8 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
-import CustomizedDialog from './CustomizedDialog';
+import { ArrowBack, Title } from '@mui/icons-material';
+
 import {
   GridRowModes,
   DataGrid,
@@ -24,41 +25,58 @@ import {
 } from '@mui/x-data-grid-generator';
 
 import axios from 'axios'
+import OperationDialog from './OperationDialog';
+import { Grid, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
 
-
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+}));
 
 const base_url = "http://localhost:4000/api/v1"
 
 function EditToolbar(props) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel, show, well } = props;
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, well_number: '', client: '', unit: '', lti_days: '', isNew: true }]);
+    setRows((oldRows) => [...oldRows, { id, operation_number: '', client: '', unit: '', lti_days: '', isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'well_number' },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'operation_number' },
     }));
   };
 
   return (
     <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add Well
+
+      <Button color="primary" startIcon={<ArrowBack />} onClick={show}>
+        {well.well_number}
       </Button>
       <Button color="warning" startIcon={<LaunchIcon />} onClick={handleClick}>
         Export
       </Button>
-      <CustomizedDialog />
+      <OperationDialog well_number={well.well_number} id={well._id} />
+
     </GridToolbarContainer>
   );
 }
 
-export default function Well(props) {
+export default function Operation(props) {
   const [rows, setRows] = React.useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
- 
+  const [well, setWell] = React.useState({})
+  const well_id = props.well_id
 
+  const show = () => {
+    props.setShowOperation(false);
+    props.setShowWell(true)
+  };
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
@@ -74,15 +92,12 @@ export default function Well(props) {
   };
 
   const handleDeleteClick = (id) => async () => {
-    await axios.delete(`${base_url}/well/${id}`);
+    await axios.delete(`${base_url}/operation/${id}`);
     setRows(rows.filter((row) => row.id !== id));
   };
   const handleLaunchClick = (id) => async () => {
-    
-    props.setShowOperation(true);
-    props.setShowWell(false)
-    console.log(id)
-    props.setWellId(id)
+    await axios.delete(`${base_url}/operation/${id}`);
+    setRows(rows.filter((row) => row.id !== id));
   };
 
   const handleCancelClick = (id) => () => {
@@ -100,7 +115,7 @@ export default function Well(props) {
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    newRow.isNew !== true ? await axios.put(`${base_url}/well/${newRow.id}`, newRow) : await axios.post(`${base_url}/well`, newRow)
+    newRow.isNew !== true ? await axios.put(`${base_url}/operation/${newRow.id}`, newRow) : await axios.post(`${base_url}/operation`, newRow)
     return updatedRow;
   };
 
@@ -109,10 +124,9 @@ export default function Well(props) {
   };
 
   const columns = [
-    { field: 'well_number', headerName: 'Well Number', width: 100, editable: true },
     {
-      field: 'rig_up_date',
-      headerName: 'Rig Up Date',
+      field: 'StartDate',
+      headerName: 'Start Date',
       type: 'date',
       width: 180,
       align: 'left',
@@ -120,18 +134,27 @@ export default function Well(props) {
       editable: true,
       valueGetter: (row) => {
         return new Date(row.value);
-      },
+      }
     },
     {
-      field: 'job_type',
-      headerName: 'Job Type',
-      width: 200,
+      field: 'Plan_HRS',
+      headerName: 'Plan Hours',
+      width: 180,
+      align: 'left',
+      headerAlign: 'left',
       editable: true,
+    },
+    {
+      field: 'Actual_HRS',
+      headerName: 'Actual Hours',
+      width: 200,
+      editable: false,
 
     },
-    { field: 'client', headerName: 'Client', width: 180, editable: true },
-    { field: 'unit', headerName: 'Unit', width: 150, editable: true },
-    { field: 'lti_days', headerName: 'LTI days', width: 100, type: 'number', editable: true },
+    { field: 'Diff_HRS', headerName: 'Difference Hours', width: 180, editable: false },
+    { field: 'operation_code', headerName: 'Operation Code', width: 150, editable: true },
+    { field: 'description', headerName: 'Description', width: 150, editable: true },
+    { field: 'createdBy', headerName: 'Created By', width: 100, type: 'number', editable: true },
     {
       field: 'actions',
       type: 'actions',
@@ -158,7 +181,7 @@ export default function Well(props) {
               onClick={handleCancelClick(id)}
               color="inherit"
             />,
-           
+
           ];
         }
 
@@ -179,13 +202,13 @@ export default function Well(props) {
             color="inherit"
           />,
           <GridActionsCellItem
-          icon={<LaunchIcon />}
-          label="DDR"
-          className="textPrimary"
-          onClick={handleLaunchClick(id)}
-          color="warning"
-        />,
-        
+            icon={<LaunchIcon />}
+            label="DDR"
+            className="textPrimary"
+            onClick={handleLaunchClick(id)}
+            color="warning"
+          />,
+
         ];
       },
     },
@@ -193,8 +216,11 @@ export default function Well(props) {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${base_url}/well`);
+      const response = await axios.get(`${base_url}/operation`);
       setRows(response.data);
+      const well = await axios.get(`${base_url}/well/${well_id}`);
+      setWell(well.data)
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -218,7 +244,24 @@ export default function Well(props) {
         },
       }}
     >
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={12}>
+              <Typography component="h2" variant="h3" color="primary" gutterBottom>
+                Well Details
+              </Typography>
+              <Typography component="p" variant="h4">
+                # {well.well_number}
+              </Typography>
+              <Typography color="text.secondary" sx={{ flex: 1 }}>
+                {well.rig_up_date}
+              </Typography>
+          </Grid>
+
+        </Grid>
+      </Box>
       <DataGrid
+        headerTitle="Operations"
         rows={rows}
         columns={columns}
         editMode="row"
@@ -230,10 +273,10 @@ export default function Well(props) {
           toolbar: EditToolbar,
         }}
         slotProps={{
-          toolbar: { setRows, setRowModesModel},
+          toolbar: { setRows, setRowModesModel, show, well },
         }}
       />
-    
+
     </Box>
   );
 }

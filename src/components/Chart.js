@@ -22,13 +22,14 @@ const data = [
 ];
 
 export default function Chart() {
+
   const theme = useTheme();
 
   return (
     <React.Fragment>
       <Title>Today</Title>
       <div style={{ width: '100%', flexGrow: 1, overflow: 'hidden' }}>
-        <LineChart
+       <LineChart
           dataset={data}
           margin={{
             top: 16,

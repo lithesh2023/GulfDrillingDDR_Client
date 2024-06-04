@@ -22,7 +22,9 @@ import Chart from './Chart';
 import Deposits from './Deposits';
 import Orders from './Orders';
 import Well from './Well';
-
+import Operation from './Operation'
+import { Button } from '@mui/material';
+let display = false
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -87,6 +89,11 @@ const defaultTheme = createTheme();
 
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
+  const [showWell, setShowWell] = React.useState(true)
+  const [showOperation, setShowOperation] = React.useState(false)
+  const [well_id,setWellId] = React.useState()
+
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
@@ -198,7 +205,8 @@ export default function Dashboard() {
               {/* Recent Orders */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Well/>
+                  {showWell ? <Well setShowOperation={setShowOperation} setShowWell={setShowWell} setWellId={setWellId}/>:null}
+                  {showOperation ?<Operation setShowWell={setShowWell} setShowOperation={setShowOperation} well_id={well_id}/>:null}
                 </Paper>
               </Grid>
             </Grid>
