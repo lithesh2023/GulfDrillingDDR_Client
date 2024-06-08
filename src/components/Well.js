@@ -8,6 +8,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CustomizedDialog from './CustomizedDialog';
+import { useNavigate  } from 'react-router-dom';
 import {
   GridRowModes,
   DataGrid,
@@ -55,6 +56,7 @@ function EditToolbar(props) {
 }
 
 export default function Well(props) {
+  const navigate = useNavigate();
   const [rows, setRows] = React.useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
  
@@ -79,10 +81,8 @@ export default function Well(props) {
   };
   const handleLaunchClick = (id) => async () => {
     
-    props.setShowOperation(true);
-    props.setShowWell(false)
-    console.log(id)
-    props.setWellId(id)
+    console.log('Button clicked', id);
+    navigate(`/Operation/${id}`);
   };
 
   const handleCancelClick = (id) => () => {
@@ -119,7 +119,7 @@ export default function Well(props) {
       headerAlign: 'left',
       editable: true,
       valueGetter: (row) => {
-        return new Date(row.value);
+        return new Date(row.value?row.value:'');
       },
     },
     {
@@ -182,6 +182,7 @@ export default function Well(props) {
           icon={<LaunchIcon />}
           label="DDR"
           className="textPrimary"
+       
           onClick={handleLaunchClick(id)}
           color="warning"
         />,

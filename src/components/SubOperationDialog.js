@@ -18,42 +18,18 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 const base_url = "http://localhost:4000/api/v1"
-export default function OperationDialog(props) {
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    let data = Object.fromEntries(formData.entries());
-    data = {...data,well:props.id}
-    await axios.post(`${base_url}/operation`, data)
-    handleClose()
-    setFormData({
-      StartDate: '',
-      Plan_HRS: '',
-      day_number: '',
-      operation_code: '',
-      Diff_HRS: '',
-      description: '',
-      createdBy: '',
-      well: ''
-    })
-  };
-  const [open, setOpen] = React.useState(false);
-  const [formData, setFormData] = React.useState({
-    StartDate: '',
-    Plan_HRS: '',
-    day_number: '',
-    operation_code: '',
-    Diff_HRS: '',
-    description: '',
-    createdBy: '',
-    well: '',
-  });
+export default function SubOperationDialog(props) {
+
   const [operationCode,setOperationCode] =React.useState([])
+  const [category,setCategory] =React.useState([])
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${base_url}/key/mainOperationCode`);
-      console.log(response.data)
-      setOperationCode(response.data[0].values);
+      const opCodeResult = await axios.get(`${base_url}/key/SubOperationCode`);
+      
+      setOperationCode(opCodeResult.data[0].values);
+      const categoryResult = await axios.get(`${base_url}/key/Category`);
+      
+      setCategory(categoryResult.data[0].values);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -63,6 +39,34 @@ export default function OperationDialog(props) {
   React.useEffect(() => {
     fetchData();
   }, []);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    let data = Object.fromEntries(formData.entries());
+    data = {...data,Operation:props.id}
+    await axios.post(`${base_url}/sub-operation`, data)
+    handleClose()
+    setFormData({
+      StartTime: '',
+      EndTime: '',
+      Type: '',
+      SubOpCOde: '',
+      Description: '',
+      createdBy: '',
+      Operation: ''
+    })
+  };
+  const [open, setOpen] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    StartTime: '',
+    EndTime: '',
+    Type: '',
+    SubOpCOde: '',
+    Description: '',
+    createdBy: '',
+    Operation: ''
+  });
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -79,7 +83,7 @@ export default function OperationDialog(props) {
   return (
     <React.Fragment>
       <Button color='success' onClick={handleClickOpen}>
-        Add Operation
+        +
       </Button>
       <BootstrapDialog
         onClose={handleClose}
@@ -87,7 +91,7 @@ export default function OperationDialog(props) {
         open={open}
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Create Operation
+          Create Sub Operation
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -104,7 +108,7 @@ export default function OperationDialog(props) {
         <DialogContent dividers>
           <Container>
             <Typography variant="h4" align="center" gutterBottom>
-              Well Number  - {props.well_number}
+            Operation Code  - {props.id}
             </Typography>
             <form onSubmit={handleSubmit}>
 
@@ -112,8 +116,8 @@ export default function OperationDialog(props) {
               <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Well ID"
-                    name="well"
+                    label="Operation ID"
+                    name="Operation"
                     value={props.id}
                     onChange={handleChange}
                     required
@@ -126,10 +130,10 @@ export default function OperationDialog(props) {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    type="date"
-                    label="Start Date"
-                    name="StartDate"
-                    value={formData.StartDate}
+                    type="time"
+                    label="Start Time"
+                    name="StartTime"
+                    value={formData.StartTime}
                     onChange={handleChange}
                     required
                     InputLabelProps={{
@@ -140,41 +144,59 @@ export default function OperationDialog(props) {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    type="number"
-                    label="Day Number"
-                    name="day_number"
-                    value={formData.day_number}
+                    type="time"
+                    label="End Time"
+                    name="EndTime"
+                    value={formData.EndTime}
                     onChange={handleChange}
                     required
-
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Plan Hours"
-                    name="Plan_HRS"
-                    value={formData.Plan_HRS}
-                    onChange={handleChange}
-                    required
-                    step=".01"
-                  />
-                </Grid>
-                <Grid item xs={12}>
+                
 
+                <Grid item xs={12}>
                   <TextField
                     select
-                    label="Operation Code"
-                    name="operation_code"
-                    value={formData.operation_code}
+                    label="Type"
+                    name="Type"
+                    value={formData.Type}
                     onChange={handleChange}
                     fullWidth
                     required
                   >
-                    
-                   {operationCode.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
-                    
+                    <MenuItem value="OPT">OPT</MenuItem>
+                    <MenuItem value="NPT">NPT</MenuItem>
+                  </TextField>
+                </Grid>
+                
+                <Grid item xs={12}>
+
+                  <TextField
+                    select
+                    label="Category"
+                    name="Category"
+                    value={formData.Category}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                  >
+                    {category.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    select
+                    label="Sub Operation Code"
+                    name="SubOpCode"
+                    value={formData.SubOpCode}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                  >
+                    {operationCode.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
                   </TextField>
                 </Grid>
                 <Grid item xs={12}>
@@ -182,8 +204,8 @@ export default function OperationDialog(props) {
                     fullWidth
                     type="text"
                     label="Description"
-                    name="description"
-                    value={formData.description}
+                    name="Description"
+                    value={formData.Description}
                     onChange={handleChange}
                     required
 

@@ -121,7 +121,7 @@ export default function CustomizedDialog() {
                     type="text"
                     label="Job Type"
                     name="job_type"
-                    value={formData.client}
+                    value={formData.job_type}
                     onChange={handleChange}
                     required
 
@@ -154,7 +154,7 @@ export default function CustomizedDialog() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    type="text"
+                    type="number"
                     label="LTI Days"
                     name="lti_days"
                     value={formData.lti_days}

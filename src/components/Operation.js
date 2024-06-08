@@ -8,7 +8,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { ArrowBack, Title } from '@mui/icons-material';
-
+import { useParams } from 'react-router-dom';
 import {
   GridRowModes,
   DataGrid,
@@ -29,6 +29,7 @@ import OperationDialog from './OperationDialog';
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
+import DetailPanelDataGrid from './CollapsibleTable'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -40,48 +41,16 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const base_url = "http://localhost:4000/api/v1"
 
-function EditToolbar(props) {
-  const { setRows, setRowModesModel, show, well } = props;
 
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, operation_number: '', client: '', unit: '', lti_days: '', isNew: true }]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'operation_number' },
-    }));
-  };
-
-  return (
-    <GridToolbarContainer>
-
-      <Button color="primary" startIcon={<ArrowBack />} onClick={show}>
-        {well.well_number}
-      </Button>
-      <Button color="warning" startIcon={<LaunchIcon />} onClick={handleClick}>
-        Export
-      </Button>
-      <OperationDialog well_number={well.well_number} id={well._id} />
-
-    </GridToolbarContainer>
-  );
-}
 
 export default function Operation(props) {
   const [rows, setRows] = React.useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
   const [well, setWell] = React.useState({})
-  const well_id = props.well_id
+  
+  const { id } = useParams();
 
-  const show = () => {
-    props.setShowOperation(false);
-    props.setShowWell(true)
-  };
-  const handleRowEditStop = (params, event) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
+
 
   const handleEditClick = (id) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -96,6 +65,7 @@ export default function Operation(props) {
     setRows(rows.filter((row) => row.id !== id));
   };
   const handleLaunchClick = (id) => async () => {
+    console.log('id', id)
     await axios.delete(`${base_url}/operation/${id}`);
     setRows(rows.filter((row) => row.id !== id));
   };
@@ -203,7 +173,7 @@ export default function Operation(props) {
           />,
           <GridActionsCellItem
             icon={<LaunchIcon />}
-            label="DDR"
+            label="Sub"
             className="textPrimary"
             onClick={handleLaunchClick(id)}
             color="warning"
@@ -216,9 +186,11 @@ export default function Operation(props) {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${base_url}/operation`);
+      const response = await axios.get(`${base_url}/operation/${id}`);
       setRows(response.data);
-      const well = await axios.get(`${base_url}/well/${well_id}`);
+      let url = window.location.href
+      
+      const well = await axios.get(`${base_url}/well/${id}`);
       setWell(well.data)
 
     } catch (error) {
@@ -234,7 +206,7 @@ export default function Operation(props) {
   return (
     <Box
       sx={{
-        height: 400,
+        
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
@@ -260,22 +232,9 @@ export default function Operation(props) {
 
         </Grid>
       </Box>
-      <DataGrid
-        headerTitle="Operations"
-        rows={rows}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        slots={{
-          toolbar: EditToolbar,
-        }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel, show, well },
-        }}
-      />
+      {console.log(well)}
+      {well._id&&<DetailPanelDataGrid {...well}></DetailPanelDataGrid>}
+      
 
     </Box>
   );

@@ -13,20 +13,20 @@ import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-
+import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './components/listitems';
-
-import Well from './components/Well';
-import Operation from './components/Operation'
-
-import Login from './components/Login';
-import Registration from './components/Registration';
-import {  Routes, Route ,Link} from "react-router-dom";
-import Dashboard from './components/Dashboard';
-
+import { mainListItems, secondaryListItems } from './listitems';
+import Chart from './Chart';
+import Deposits from './Deposits';
+import Orders from './Orders';
+import Well from './Well';
+import Operation from './Operation'
+import { Button } from '@mui/material';
+import Login from './Login';
+import Registration from './Registration';
+let display = false
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -89,7 +89,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function App() {
+export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
   const [showWell, setShowWell] = React.useState(true)
   const [showOperation, setShowOperation] = React.useState(false)
@@ -178,23 +178,41 @@ export default function App() {
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                    <Routes>
-                      <Route path="/" >
-                        <Route index element={<Login />} />
-                        <Route path="Dashboard" element={<Dashboard></Dashboard>} />
-                        <Route path="Login" element={<Login />} />
-                        <Route path="Register" element={<Registration />} />
-                        <Route path="Well" element={<Well />} />
-                        <Route path="Operation/:id" element={<Operation />} />
-
-                      </Route>
-                    </Routes>
-
+              {/* Chart */}
+              <Grid item xs={12} md={8} lg={9}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 240,
+                  }}
+                >
+                  <Chart />
                 </Paper>
               </Grid>
-             
+              {/* Recent Deposits */}
+              <Grid item xs={12} md={4} lg={3}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 240,
+                  }}
+                >
+                  <Deposits />
+                </Paper>
+              </Grid>
+              {/* Recent Orders */}
+              <Grid item xs={12}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                  {showWell ? <Well setShowOperation={setShowOperation} setShowWell={setShowWell} setWellId={setWellId} /> : null}
+                  {showOperation ? <Operation setShowWell={setShowWell} setShowOperation={setShowOperation} well_id={well_id} /> : null}
+                </Paper>
+              </Grid>
+              <Login></Login>
+              <Registration></Registration>
             </Grid>
             <Copyright sx={{ pt: 4 }} />
 
