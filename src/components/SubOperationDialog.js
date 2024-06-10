@@ -24,10 +24,18 @@ export default function SubOperationDialog(props) {
   const [category,setCategory] =React.useState([])
   const fetchData = async () => {
     try {
-      const opCodeResult = await axios.get(`${base_url}/key/SubOperationCode`);
+      const opCodeResult = await axios.get(`${base_url}/key/SubOperationCode`, {
+        headers: {
+          'authorization': localStorage.getItem('token'),
+        }
+      });
       
       setOperationCode(opCodeResult.data[0].values);
-      const categoryResult = await axios.get(`${base_url}/key/Category`);
+      const categoryResult = await axios.get(`${base_url}/key/Category`, {
+        headers: {
+          'authorization': localStorage.getItem('token'),
+        }
+      });
       
       setCategory(categoryResult.data[0].values);
     } catch (error) {
@@ -44,7 +52,11 @@ export default function SubOperationDialog(props) {
     const formData = new FormData(event.target);
     let data = Object.fromEntries(formData.entries());
     data = {...data,Operation:props.id}
-    await axios.post(`${base_url}/sub-operation`, data)
+    await axios.post(`${base_url}/sub-operation`, data, {
+      headers: {
+        'authorization': localStorage.getItem('token'),
+      }
+    })
     handleClose()
     setFormData({
       StartTime: '',
@@ -90,7 +102,7 @@ export default function SubOperationDialog(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <DialogTitle sx={{ m: 0, p: 2 ,backgroundColor: '#4caf50'}} id="customized-dialog-title">
           Create Sub Operation
         </DialogTitle>
         <IconButton

@@ -10,33 +10,42 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { Link } from 'react-router-dom'
+import OilRigIcon from './OilRigIcon';
+import { OilBarrelTwoTone } from '@mui/icons-material';
 export const mainListItems = (
   <React.Fragment>
+    <Link to = "/Dashboard" style={{ textDecoration: 'none' }}>
     <ListItemButton>
       <ListItemIcon>
         <DashboardIcon />
       </ListItemIcon>
-      <Link to = "/Dashboard" style={{ textDecoration: 'none' }}>Dashboard</Link>
+      <ListItemText primary="Dashboard" />
     </ListItemButton>
+    </Link>
+    <Link to = "/Well" style={{ textDecoration: 'none' }}>
     <ListItemButton>
       <ListItemIcon>
-        <ShoppingCartIcon />
+        <OilBarrelTwoTone></OilBarrelTwoTone>
       </ListItemIcon>
-      <Link to = "/Well" style={{ textDecoration: 'none' }}>Wells</Link>
+      <ListItemText primary="Wells" />
     </ListItemButton>
+    </Link>
+    <Link to = "/Employees" style={{ textDecoration: 'none' }}>
     <ListItemButton>
       <ListItemIcon>
         <PeopleIcon />
       </ListItemIcon>
-      
-      <Link to = "/Employees" style={{ textDecoration: 'none' }}>Employees</Link>
+      <ListItemText primary="Employees" />
     </ListItemButton>
+    </Link>
+    <Link to = "/Report" style={{ textDecoration: 'none' }}>
     <ListItemButton>
       <ListItemIcon>
         <BarChartIcon />
       </ListItemIcon>
-      <ListItemText primary="Reports" />
+      <ListItemText primary="Fuel Report" />
     </ListItemButton>
+    </Link>
     <ListItemButton>
       <ListItemIcon>
         <LayersIcon />

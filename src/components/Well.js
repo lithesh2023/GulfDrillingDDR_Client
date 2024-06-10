@@ -8,7 +8,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CustomizedDialog from './CustomizedDialog';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   GridRowModes,
   DataGrid,
@@ -59,7 +59,7 @@ export default function Well(props) {
   const navigate = useNavigate();
   const [rows, setRows] = React.useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
- 
+
 
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -76,11 +76,15 @@ export default function Well(props) {
   };
 
   const handleDeleteClick = (id) => async () => {
-    await axios.delete(`${base_url}/well/${id}`);
+    await axios.delete(`${base_url}/well/${id}`, {
+      headers: {
+        'authorization': localStorage.getItem('token'),
+      }
+    });
     setRows(rows.filter((row) => row.id !== id));
   };
   const handleLaunchClick = (id) => async () => {
-    
+
     console.log('Button clicked', id);
     navigate(`/Operation/${id}`);
   };
@@ -100,7 +104,15 @@ export default function Well(props) {
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    newRow.isNew !== true ? await axios.put(`${base_url}/well/${newRow.id}`, newRow) : await axios.post(`${base_url}/well`, newRow)
+    newRow.isNew !== true ? await axios.put(`${base_url}/well/${newRow.id}`, newRow, {
+      headers: {
+        'authorization': localStorage.getItem('token'),
+      }
+    }) : await axios.post(`${base_url}/well`, newRow, {
+      headers: {
+        'authorization': localStorage.getItem('token'),
+      }
+    })
     return updatedRow;
   };
 
@@ -119,7 +131,7 @@ export default function Well(props) {
       headerAlign: 'left',
       editable: true,
       valueGetter: (row) => {
-        return new Date(row.value?row.value:'');
+        return new Date(row.value ? row.value : '');
       },
     },
     {
@@ -158,7 +170,7 @@ export default function Well(props) {
               onClick={handleCancelClick(id)}
               color="inherit"
             />,
-           
+
           ];
         }
 
@@ -179,14 +191,14 @@ export default function Well(props) {
             color="inherit"
           />,
           <GridActionsCellItem
-          icon={<LaunchIcon />}
-          label="DDR"
-          className="textPrimary"
-       
-          onClick={handleLaunchClick(id)}
-          color="warning"
-        />,
-        
+            icon={<LaunchIcon />}
+            label="DDR"
+            className="textPrimary"
+
+            onClick={handleLaunchClick(id)}
+            color="warning"
+          />,
+
         ];
       },
     },
@@ -194,7 +206,12 @@ export default function Well(props) {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${base_url}/well`);
+      const token = localStorage.getItem('token')
+      const response = await axios.get(`${base_url}/well`, {
+        headers: {
+          'authorization': token,
+        }
+      });
       setRows(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -231,10 +248,15 @@ export default function Well(props) {
           toolbar: EditToolbar,
         }}
         slotProps={{
-          toolbar: { setRows, setRowModesModel},
+          toolbar: { setRows, setRowModesModel },
+        }}
+        sx={{
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: '#20547b', color: 'white', fontWeight: 'large',
+          },
         }}
       />
-    
+
     </Box>
   );
 }

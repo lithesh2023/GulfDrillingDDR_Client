@@ -23,7 +23,11 @@ export default function CustomizedDialog() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
-    await axios.post(`${base_url}/well`, data)
+    await axios.post(`${base_url}/well`, data, {
+      headers: {
+        'authorization': localStorage.getItem('token'),
+      }
+    })
     handleClose()
     setFormData({
       well_number: '',

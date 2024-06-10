@@ -13,7 +13,7 @@ import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-
+import { Avatar } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -24,9 +24,12 @@ import Operation from './components/Operation'
 
 import Login from './components/Login';
 import Registration from './components/Registration';
-import {  Routes, Route ,Link} from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import Dashboard from './components/Dashboard';
-
+import PrivateRoute from './components/PrivateRoute';
+import UserAvatar from './components/UserAvatar';
+import Employees from './components/Employees'
+import UserProfile from './components/UserProfile';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -90,15 +93,15 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function App() {
-  const [open, setOpen] = React.useState(true);
-  const [showWell, setShowWell] = React.useState(true)
-  const [showOperation, setShowOperation] = React.useState(false)
-  const [well_id, setWellId] = React.useState()
-
+  const [open, setOpen] = React.useState(false);
+  const [user, setUser] = React.useState({})
 
   const toggleDrawer = () => {
     setOpen(!open);
   };
+  function getUser(data) {
+    setUser(data);
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -108,9 +111,10 @@ export default function App() {
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
+              backgroundColor: '#19445b'
             }}
           >
-            <IconButton
+            {localStorage.getItem('token') && <IconButton
               edge="start"
               color="inherit"
               aria-label="open drawer"
@@ -121,7 +125,8 @@ export default function App() {
               }}
             >
               <MenuIcon />
-            </IconButton>
+            </IconButton>}
+            <Avatar alt="Gulf Drilling DDR" src="/rig_icon.png" sx={{ width: 56, height: 56, borderRadius: 2, marginRight: 4 }} />
             <Typography
               component="h1"
               variant="h6"
@@ -129,21 +134,20 @@ export default function App() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              Gulf Drilling DDR
             </Typography>
-            <IconButton color="inherit">
+            {localStorage.getItem('token') && <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            </IconButton>}
+
+            {localStorage.getItem('token') && <UserAvatar user={user}></UserAvatar>}
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open}>
+        {localStorage.getItem('token') && <Drawer variant="permanent" open={open} >
+
+
           <Toolbar
             sx={{
               display: 'flex',
@@ -162,8 +166,9 @@ export default function App() {
             <Divider sx={{ my: 1 }} />
             {secondaryListItems}
           </List>
-        </Drawer>
+        </Drawer>}
         <Box
+          alignItems='center'
           component="main"
           sx={{
             backgroundColor: (theme) =>
@@ -176,31 +181,36 @@ export default function App() {
           }}
         >
           <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
+          {/* <Login onData={getUser}/> */}
+          <Container sx={{ mt: 4, mb: 4 }} >
+            {/* <Grid container spacing={3}> */}
+              {/* <Grid item > */}
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                    <Routes>
-                      <Route path="/" >
-                        <Route index element={<Login />} />
-                        <Route path="Dashboard" element={<Dashboard></Dashboard>} />
-                        <Route path="Login" element={<Login />} />
-                        <Route path="Register" element={<Registration />} />
+                  <Routes>
+                    <Route path="/" >
+                      {/* <Route index element={<Login />} /> */}
+
+                      <Route path="Login" element={<Login onData={getUser} />} />
+                      <Route path="Register" element={<Registration />} />
+                      <Route path="/" element={<PrivateRoute />}>
+                        <Route path="Dashboard" element={<Dashboard />} />
                         <Route path="Well" element={<Well />} />
                         <Route path="Operation/:id" element={<Operation />} />
-
+                        <Route path="Employees" element={<Employees></Employees>} />
+                        <Route path="Profile" element={<UserProfile user={user}></UserProfile>} />
                       </Route>
-                    </Routes>
+
+                    </Route>
+                  </Routes>
 
                 </Paper>
-              </Grid>
-             
-            </Grid>
-            <Copyright sx={{ pt: 4 }} />
+              {/* </Grid> */}
+
+            {/* </Grid>
+            <Copyright sx={{ pt: 4 }} /> */}
 
           </Container>
         </Box>
-        x
       </Box>
 
     </ThemeProvider>

@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
 import { TextField, Button, Container, Typography, Grid } from '@mui/material'
 import axios from 'axios'
+import { Add } from '@mui/icons-material';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -24,7 +25,12 @@ export default function OperationDialog(props) {
     const formData = new FormData(event.target);
     let data = Object.fromEntries(formData.entries());
     data = {...data,well:props.id}
-    await axios.post(`${base_url}/operation`, data)
+    const token = localStorage.getItem('token')
+    await axios.post(`${base_url}/operation`, data, {
+      headers: {
+        'authorization': token,
+      }
+    })
     handleClose()
     setFormData({
       StartDate: '',
@@ -51,7 +57,11 @@ export default function OperationDialog(props) {
   const [operationCode,setOperationCode] =React.useState([])
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${base_url}/key/mainOperationCode`);
+      const response = await axios.get(`${base_url}/key/mainOperationCode`, {
+        headers: {
+          'authorization': localStorage.getItem('token'),
+        }
+      });
       console.log(response.data)
       setOperationCode(response.data[0].values);
     } catch (error) {
@@ -78,7 +88,7 @@ export default function OperationDialog(props) {
 
   return (
     <React.Fragment>
-      <Button color='success' onClick={handleClickOpen}>
+      <Button startIcon={<Add></Add>} onClick={handleClickOpen} variant="outlined" sx={{margin:'4px'}}>
         Add Operation
       </Button>
       <BootstrapDialog
@@ -86,7 +96,7 @@ export default function OperationDialog(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <DialogTitle sx={{ m: 0, p: 2 ,backgroundColor: '#4caf50'}} id="customized-dialog-title">
           Create Operation
         </DialogTitle>
         <IconButton
