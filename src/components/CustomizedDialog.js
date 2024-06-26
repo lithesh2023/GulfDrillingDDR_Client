@@ -18,7 +18,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 const base_url = "http://localhost:4000/api/v1"
-export default function CustomizedDialog() {
+export default function CustomizedDialog(props) {
+  const {unit} =props
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -149,10 +150,12 @@ export default function CustomizedDialog() {
                     type="text"
                     label="Unit"
                     name="unit"
-                    value={formData.text}
-                    onChange={handleChange}
+                    value={unit}
+                    id="filled-disabled"
                     required
-
+                    InputProps={{
+                      readOnly: true,
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>

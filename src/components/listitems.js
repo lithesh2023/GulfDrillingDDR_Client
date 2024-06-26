@@ -14,37 +14,37 @@ import OilRigIcon from './OilRigIcon';
 import { OilBarrelTwoTone } from '@mui/icons-material';
 export const mainListItems = (
   <React.Fragment>
-    <Link to = "/Dashboard" style={{ textDecoration: 'none' }}>
-    <ListItemButton>
-      <ListItemIcon>
-        <DashboardIcon />
-      </ListItemIcon>
-      <ListItemText primary="Dashboard" />
-    </ListItemButton>
+    <Link to="/Dashboard" style={{ textDecoration: 'none' }}>
+      <ListItemButton>
+        <ListItemIcon>
+          <DashboardIcon />
+        </ListItemIcon>
+        <ListItemText primary="Dashboard" />
+      </ListItemButton>
     </Link>
-    <Link to = "/Well" style={{ textDecoration: 'none' }}>
-    <ListItemButton>
-      <ListItemIcon>
-        <OilBarrelTwoTone></OilBarrelTwoTone>
-      </ListItemIcon>
-      <ListItemText primary="Wells" />
-    </ListItemButton>
+    <Link to="/Well" style={{ textDecoration: 'none' }}>
+      <ListItemButton>
+        <ListItemIcon>
+          <OilBarrelTwoTone></OilBarrelTwoTone>
+        </ListItemIcon>
+        <ListItemText primary="Wells" />
+      </ListItemButton>
     </Link>
-    <Link to = "/Employees" style={{ textDecoration: 'none' }}>
-    <ListItemButton>
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Employees" />
-    </ListItemButton>
+    <Link to="/Employees" style={{ textDecoration: 'none' }}>
+      <ListItemButton>
+        <ListItemIcon>
+          <PeopleIcon />
+        </ListItemIcon>
+        <ListItemText primary="Employees" />
+      </ListItemButton>
     </Link>
-    <Link to = "/Report" style={{ textDecoration: 'none' }}>
-    <ListItemButton>
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Fuel Report" />
-    </ListItemButton>
+    <Link to="/Report" style={{ textDecoration: 'none' }}>
+      <ListItemButton>
+        <ListItemIcon>
+          <BarChartIcon />
+        </ListItemIcon>
+        <ListItemText primary="Fuel" />
+      </ListItemButton>
     </Link>
     <ListItemButton>
       <ListItemIcon>

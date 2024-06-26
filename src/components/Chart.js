@@ -1,78 +1,70 @@
 import * as React from 'react';
-import { useTheme } from '@mui/material/styles';
-import { LineChart, axisClasses } from '@mui/x-charts';
+import { LineChart, AnimatedLine } from '@mui/x-charts/LineChart';
+import { useChartId, useDrawingArea, useXScale } from '@mui/x-charts/hooks';
 
-import Title from './Title';
+function CustomAnimatedLine(props) {
+  const { limit, sxBefore, sxAfter, ...other } = props;
+  const { top, bottom, height, left, width } = useDrawingArea();
+  const scale = useXScale();
+  const chartId = useChartId();
 
-// Generate Sales Data
-function createData(time, amount) {
-  return { time, amount: amount ?? null };
-}
+  if (limit === undefined) {
+    return <AnimatedLine {...other} />;
+  }
 
-const data = [
-  createData('00:00', 0),
-  createData('03:00', 300),
-  createData('06:00', 600),
-  createData('09:00', 800),
-  createData('12:00', 1500),
-  createData('15:00', 2000),
-  createData('18:00', 2400),
-  createData('21:00', 2400),
-  createData('24:00'),
-];
+  const limitPosition = scale(limit); // Convert value to x coordinate.
 
-export default function Chart() {
+  if (limitPosition === undefined) {
+    return <AnimatedLine {...other} />;
+  }
 
-  const theme = useTheme();
-
+  const clipIdleft = `${chartId}-${props.ownerState.id}-line-limit-${limit}-1`;
+  const clipIdRight = `${chartId}-${props.ownerState.id}-line-limit-${limit}-2`;
   return (
     <React.Fragment>
-      <Title>Today</Title>
-      <div style={{ width: '100%', flexGrow: 1, overflow: 'hidden' }}>
-       <LineChart
-          dataset={data}
-          margin={{
-            top: 16,
-            right: 20,
-            left: 70,
-            bottom: 30,
-          }}
-          xAxis={[
-            {
-              scaleType: 'point',
-              dataKey: 'time',
-              tickNumber: 2,
-              tickLabelStyle: theme.typography.body2,
-            },
-          ]}
-          yAxis={[
-            {
-              label: 'Sales ($)',
-              labelStyle: {
-                ...theme.typography.body1,
-                fill: theme.palette.text.primary,
-              },
-              tickLabelStyle: theme.typography.body2,
-              max: 2500,
-              tickNumber: 3,
-            },
-          ]}
-          series={[
-            {
-              dataKey: 'amount',
-              showMark: false,
-              color: theme.palette.primary.light,
-            },
-          ]}
-          sx={{
-            [`.${axisClasses.root} line`]: { stroke: theme.palette.text.secondary },
-            [`.${axisClasses.root} text`]: { fill: theme.palette.text.secondary },
-            [`& .${axisClasses.left} .${axisClasses.label}`]: {
-              transform: 'translateX(-25px)',
-            },
-          }}
+      {/* Clip to show the line before the limit */}
+      <clipPath id={clipIdleft}>
+        <rect
+          x={left}
+          y={0}
+          width={limitPosition - left}
+          height={top + height + bottom}
         />
-      </div>
+      </clipPath>
+      {/* Clip to show the line after the limit */}
+      <clipPath id={clipIdRight}>
+        <rect
+          x={limitPosition}
+          y={0}
+          width={left + width - limitPosition}
+          height={top + height + bottom}
+        />
+      </clipPath>
+      <g clipPath={`url(#${clipIdleft})`}>
+        <AnimatedLine {...other} sx={sxBefore} />
+      </g>
+      <g clipPath={`url(#${clipIdRight})`}>
+        <AnimatedLine {...other} sx={sxAfter} />
+      </g>
     </React.Fragment>
+  );
+}
+
+export default function LineWithPrediction() {
+  return (
+    <LineChart
+      series={[
+        {
+          type: 'line',
+          data: [1, 2, 3, 4, 1, 2, 3, 4, 5],
+          valueFormatter: (v, i) => `${v}${i.dataIndex > 5 ? ' (estimated)' : ''}`,
+        },
+      ]}
+      xAxis={[{ data: [0, 1, 2, 3, 4, 5, 6, 7, 8] }]}
+      height={200}
+      width={400}
+      slots={{ line: CustomAnimatedLine }}
+      slotProps={{ line: { limit: 5, sxAfter: { strokeDasharray: '10 5' } } }}
+    />
   );
 }

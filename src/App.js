@@ -30,6 +30,8 @@ import PrivateRoute from './components/PrivateRoute';
 import UserAvatar from './components/UserAvatar';
 import Employees from './components/Employees'
 import UserProfile from './components/UserProfile';
+import CrewList from './components/CrewList';
+import POBList from './components/POBList';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -193,10 +195,10 @@ export default function App() {
                       <Route path="Login" element={<Login onData={getUser} />} />
                       <Route path="Register" element={<Registration />} />
                       <Route path="/" element={<PrivateRoute />}>
-                        <Route path="Dashboard" element={<Dashboard />} />
-                        <Route path="Well" element={<Well />} />
+                        <Route path="Dashboard" element={<Dashboard user={user}/>} />
+                        <Route path="Well" element={<Well user={user}/>} />
                         <Route path="Operation/:id" element={<Operation />} />
-                        <Route path="Employees" element={<Employees></Employees>} />
+                        <Route path="Employees" element={<POBList></POBList>} />
                         <Route path="Profile" element={<UserProfile user={user}></UserProfile>} />
                       </Route>
 

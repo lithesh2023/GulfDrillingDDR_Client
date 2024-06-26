@@ -7,62 +7,61 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Chart from './Chart';
 import Deposits from './Deposits';
-
+import Title from './Title';
 
 import InfoIcon from '@mui/icons-material/Info';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PersonIcon from '@mui/icons-material/Person';
+import axios from 'axios';
+import { Divider, Slide, Typography } from '@mui/material';
+import WellHoursChart from './WellHoursChart';
+import { LocalGasStation, OilBarrel } from '@mui/icons-material';
+import Slideshow from './Slideshow';
 
-// TODO remove, this demo shouldn't need to reset the theme.
+
 const defaultTheme = createTheme();
+const base_url = "http://localhost:4000/api/v1"
+export default function Dashboard(props) {
+  const [userCount, setUserCount] = React.useState([]);
+  const [wellCount, setWellCount] = React.useState([]);
+  const [pobCount,setPObCount] = React.useState([]);
+  const user = props.user
+  React.useEffect(() => {
+    try {
 
-export default function Dashboard() {
+      axios.get(`${base_url}/dashboard`, {
+        headers: {
+          'authorization': localStorage.getItem('token'),
+        }
+      }).then((results) => {
+        setUserCount(results.data.userCount)
+        setWellCount(results.data.wellCount)
+        setPObCount(results.data.POB)
+      }).catch((err) => {
+        console.log('Error: ' + err)
+      })
 
 
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }, []);
   return (
 
 
     <Box>
+      <Typography component="h4" variant="h4" color="primary" gutterBottom>
+        Welcome {user.name} to the unit - {user.unit}
+      </Typography>
+      <Divider></Divider>
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          {/* Chart */}
-          <Grid item xs={12} md={8} lg={9}>
-            <Paper
-              sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 240,
-              }}
-            >
-              <Chart />
-            </Paper>
-          </Grid>
-          {/* Recent Deposits */}
-          <Grid item xs={12} md={4} lg={3}>
-            <Paper
-              sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                height: 240,
-              }}
-            >
-              <Deposits />
-            </Paper>
-          </Grid>
-
-        </Grid>
-      </Container>
-      
       <Container>
         <Grid container spacing={2} sx={{ marginTop: 2 }}>
           <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
               title="New Users"
-              value="1,234"
-              icon={<PersonIcon />}
+              value={userCount}
+              icon={<PersonIcon sx={{ fontSize: 60 }} />}
               color="primary"
               link="/Employees"
               footerText="View Details"
@@ -70,19 +69,29 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
-              title="Sales"
+              title="POB"
+              value={pobCount}
+              icon={<PersonIcon sx={{ fontSize: 60 }} />}
+              color="ff9a32"
+              link="/Employees"
+              footerText="View Details"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <SmallBoxWidget
+              title="Fuel"
               value="$12,345"
-              icon={<TrendingUpIcon />}
+              icon={<TrendingUpIcon sx={{ fontSize: 60 }} />}
               color="secondary"
-              link="/sales"
+              link="/report"
               footerText="See More"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
               title="Active wells"
-              value="12"
-              icon={<InfoIcon />}
+              value={wellCount}
+              icon={<InfoIcon sx={{ fontSize: 60 }} />}
               color="success"
               link="/Well"
               footerText="Current well details"
@@ -90,6 +99,92 @@ export default function Dashboard() {
           </Grid>
         </Grid>
       </Container>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Grid container spacing={2} sx={{ marginTop: 2 }}>
+          <Grid item xs={12} md={12} lg={12} sx={{ p: 2, }}>
+            <Paper
+              sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: '#eeeeee'
+              }}
+            >
+              <Slideshow />
+            </Paper>
+          </Grid>
+        </Grid>
+
+      </Container>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Grid container spacing={3}>
+          {/* Bar Chart */}
+          <Grid item xs={12} md={4} lg={6}>
+            <Paper
+              sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+
+                backgroundColor: '#eeeeee'
+              }}
+            ><Title><OilBarrel></OilBarrel>Actual vs Planned Hours</Title>
+              <Divider></Divider>
+              <WellHoursChart></WellHoursChart>
+            </Paper>
+          </Grid>
+          {/*Line Chart */}
+          <Grid item xs={12} md={4} lg={6}>
+            <Paper
+              sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'auto',
+                backgroundColor: '#eeeeee'
+              }}
+            >
+              <Title><LocalGasStation></LocalGasStation>Fuel Consumption</Title>
+              <Divider></Divider>
+              <Chart />
+            </Paper>
+          </Grid>
+
+
+          <Grid item xs={12} md={4} lg={6}>
+            <Paper
+              sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 240,
+                backgroundColor: '#eeeeee'
+              }}
+            >
+              <Deposits />
+            </Paper>
+          </Grid>
+          {/* Recent Deposits */}
+          <Grid item xs={12} md={4} lg={6} sx={{ p: 2, }}>
+            <Paper
+              sx={{
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: 240,
+                backgroundColor: '#eeeeee'
+
+              }}
+            >
+
+            </Paper>
+          </Grid>
+        </Grid>
+
+      </Container>
+
+
     </Box>
 
 

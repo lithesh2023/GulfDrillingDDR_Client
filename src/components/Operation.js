@@ -69,11 +69,6 @@ export default function Operation(props) {
 
 
 
-
-  const fetchData = async () => {
-
-  };
-
   // Call fetchData on component mount
   React.useEffect(() => {
     try {
@@ -110,21 +105,21 @@ export default function Operation(props) {
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={6} md={12}>
-            <Typography component="h2" variant="h3" color="primary" gutterBottom>
-              Well Details
+            <Typography component="h2" variant="h5" color="primary" gutterBottom>
+              Operations Details
             </Typography>
-            <Typography component="p" variant="h4">
-              # {well.well_number}
+            <Typography component="p" variant="h6">
+             Well Number : # {well.well_number}
             </Typography>
             <Typography color="text.secondary" sx={{ flex: 1 }}>
-              {well.rig_up_date}
+             Rigup Date: {new Date(well.rig_up_date).toLocaleDateString("en-US")}
             </Typography>
           </Grid>
 
         </Grid>
       </Box>
 
-      {console.log("well",well)}
+     
       {well._id  && <DetailPanelDataGrid {...well}></DetailPanelDataGrid>}
 
     </Box>

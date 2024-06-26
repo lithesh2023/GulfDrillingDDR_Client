@@ -9,19 +9,20 @@ import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CustomizedDialog from './CustomizedDialog';
 import { useNavigate } from 'react-router-dom';
+import { Grid, Typography } from '@mui/material';
 import {
   GridRowModes,
   DataGrid,
   GridToolbarContainer,
   GridActionsCellItem,
   GridRowEditStopReasons,
+  GridToolbar
 
 } from '@mui/x-data-grid';
 import {
-  randomCreatedDate,
-  randomTraderName,
+
   randomId,
-  randomArrayItem,
+
 } from '@mui/x-data-grid-generator';
 
 import axios from 'axios'
@@ -31,7 +32,7 @@ import axios from 'axios'
 const base_url = "http://localhost:4000/api/v1"
 
 function EditToolbar(props) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel, user } = props;
 
   const handleClick = () => {
     const id = randomId();
@@ -44,13 +45,8 @@ function EditToolbar(props) {
 
   return (
     <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add Well
-      </Button>
-      <Button color="warning" startIcon={<LaunchIcon />} onClick={handleClick}>
-        Export
-      </Button>
-      <CustomizedDialog />
+      <CustomizedDialog unit={user.unit} />
+      <GridToolbar></GridToolbar>
     </GridToolbarContainer>
   );
 }
@@ -60,6 +56,7 @@ export default function Well(props) {
   const [rows, setRows] = React.useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
 
+  const { user } = props
 
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -85,7 +82,6 @@ export default function Well(props) {
   };
   const handleLaunchClick = (id) => async () => {
 
-    console.log('Button clicked', id);
     navigate(`/Operation/${id}`);
   };
 
@@ -131,7 +127,7 @@ export default function Well(props) {
       headerAlign: 'left',
       editable: true,
       valueGetter: (row) => {
-        return new Date(row.value ? row.value : '');
+        return new Date(row ? row : '');
       },
     },
     {
@@ -234,8 +230,22 @@ export default function Well(props) {
         '& .textPrimary': {
           color: 'text.primary',
         },
+        '& .MuiDataGrid-columnHeaders': {
+          backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
+        },
+        backgroundColor: '#f3f3f3'
       }}
-    >
+    ><Box sx={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={12}>
+            <Typography component="h2" variant="h5" color="primary" gutterBottom>
+              Well Details
+            </Typography>
+
+          </Grid>
+
+        </Grid>
+      </Box>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -245,15 +255,10 @@ export default function Well(props) {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         slots={{
-          toolbar: EditToolbar,
+          toolbar: EditToolbar
         }}
         slotProps={{
-          toolbar: { setRows, setRowModesModel },
-        }}
-        sx={{
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: '#20547b', color: 'white', fontWeight: 'large',
-          },
+          toolbar: { setRows, setRowModesModel, user, showQuickFilter: true},
         }}
       />
 

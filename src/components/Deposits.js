@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Title from './Title';
+import { LocalGasStation } from '@mui/icons-material';
 
 function preventDefault(event) {
   event.preventDefault();
@@ -10,7 +11,9 @@ function preventDefault(event) {
 export default function Deposits(props) {
   return (
     <React.Fragment>
-      <Title>Fuel Consumption</Title>
+      <Title><Typography component="p" variant="h6">
+      <LocalGasStation></LocalGasStation>Fuel Consumption
+      </Typography></Title>
       <Typography component="p" variant="h4">
         $3,024.00
       </Typography>

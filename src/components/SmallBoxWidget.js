@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#fff',
     boxShadow: theme.shadows[3],
     transition: 'transform 0.3s ease',
-    height: '170px', // Adjusted height to accommodate footer
+    height: '150px', // Adjusted height to accommodate footer
     '&:hover': {
       transform: 'scale(1.05)',
     },
@@ -28,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
   success: {
     backgroundColor: theme.palette.success.main,
   },
+
+  ff9a32:{
+    backgroundColor:'#ff9a32'
+  },
   icon: {
     fontSize: 20, // Increased icon size
     transition: 'font-size 0.3s ease',
@@ -39,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     textAlign: 'right',
+    height:'100px'
   },
   footer: {
     padding: theme.spacing(1),
