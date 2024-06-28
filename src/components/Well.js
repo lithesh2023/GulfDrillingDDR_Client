@@ -1,13 +1,13 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
+import { useSelector, useDispatch } from 'react-redux';
+import { getWells ,addWell,updateWell,deleteWell} from '../redux/actions/wellActions';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
-import CustomizedDialog from './CustomizedDialog';
+import WellDialog from './WellDialog';
 import { useNavigate } from 'react-router-dom';
 import { Grid, Typography } from '@mui/material';
 import {
@@ -19,44 +19,31 @@ import {
   GridToolbar
 
 } from '@mui/x-data-grid';
-import {
-
-  randomId,
-
-} from '@mui/x-data-grid-generator';
-
-import axios from 'axios'
 
 
-
-const base_url = "http://localhost:4000/api/v1"
 
 function EditToolbar(props) {
-  const { setRows, setRowModesModel, user } = props;
-
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, well_number: '', client: '', unit: '', lti_days: '', isNew: true }]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'well_number' },
-    }));
-  };
+  const { setRowModesModel, user } = props;
 
   return (
     <GridToolbarContainer>
-      <CustomizedDialog unit={user.unit} />
+      <WellDialog  />
       <GridToolbar></GridToolbar>
     </GridToolbarContainer>
   );
 }
 
-export default function Well(props) {
-  const navigate = useNavigate();
-  const [rows, setRows] = React.useState([]);
-  const [rowModesModel, setRowModesModel] = React.useState({});
+export default function Well() {
 
-  const { user } = props
+  const navigate = useNavigate();
+  const [rowModesModel, setRowModesModel] = React.useState({});
+  const dispatch = useDispatch();
+  const rows = useSelector((state) => state.wells.wells)
+  const user = useSelector((state) => state.user.user)
+  const loading = useSelector((state) => state.wells.loading);
+  const error = useSelector((state) => state.wells.error);
+
+  
 
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -73,12 +60,7 @@ export default function Well(props) {
   };
 
   const handleDeleteClick = (id) => async () => {
-    await axios.delete(`${base_url}/well/${id}`, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    });
-    setRows(rows.filter((row) => row.id !== id));
+    dispatch(deleteWell(id))
   };
   const handleLaunchClick = (id) => async () => {
 
@@ -93,22 +75,14 @@ export default function Well(props) {
 
     const editedRow = rows.find((row) => row.id === id);
     if (editedRow.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
+      // setRows(rows.filter((row) => row.id !== id));
     }
   };
 
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    newRow.isNew !== true ? await axios.put(`${base_url}/well/${newRow.id}`, newRow, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    }) : await axios.post(`${base_url}/well`, newRow, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    })
+    // setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    newRow.isNew !== true ? dispatch(updateWell(newRow)) :dispatch(addWell(newRow));
     return updatedRow;
   };
 
@@ -200,29 +174,17 @@ export default function Well(props) {
     },
   ];
 
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const response = await axios.get(`${base_url}/well`, {
-        headers: {
-          'authorization': token,
-        }
-      });
-      setRows(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+ 
 
   // Call fetchData on component mount
-  React.useEffect(() => {
-    fetchData();
-  }, [rowModesModel]);
+  useEffect(() => {
+    dispatch(getWells());
+  }, [dispatch]);
 
   return (
     <Box
       sx={{
-        height: 400,
+        height: '100%',
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
@@ -258,7 +220,20 @@ export default function Well(props) {
           toolbar: EditToolbar
         }}
         slotProps={{
-          toolbar: { setRows, setRowModesModel, user, showQuickFilter: true},
+          toolbar: { setRowModesModel, user, showQuickFilter: true },
+        }}
+        sx={{
+          '& .MuiDataGrid-root': {
+            minHeight: 300,
+          },
+          '& .MuiDataGrid-columnHeader': {
+            backgroundColor: '#20547b', color: 'white', fontWeight: 14,
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
+          },
         }}
       />
 

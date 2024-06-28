@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Avatar, Typography, Container, Grid, Box } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-
+import {useSelector} from 'react-redux'
 const useStyles = makeStyles((theme) => ({
   profileCard: {
     marginTop: theme.spacing(5),
@@ -21,9 +21,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const UserProfile = ({user}) => {
+const UserProfile = () => {
   const classes = useStyles();
-
+  const user = useSelector((state) => state.user.user)
  
 
   return (

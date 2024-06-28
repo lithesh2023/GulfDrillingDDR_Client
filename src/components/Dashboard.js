@@ -17,7 +17,7 @@ import { Divider, Slide, Typography } from '@mui/material';
 import WellHoursChart from './WellHoursChart';
 import { LocalGasStation, OilBarrel } from '@mui/icons-material';
 import Slideshow from './Slideshow';
-
+import{useSelector} from 'react-redux'
 
 const defaultTheme = createTheme();
 const base_url = "http://localhost:4000/api/v1"
@@ -25,7 +25,7 @@ export default function Dashboard(props) {
   const [userCount, setUserCount] = React.useState([]);
   const [wellCount, setWellCount] = React.useState([]);
   const [pobCount,setPObCount] = React.useState([]);
-  const user = props.user
+  const user = useSelector((state) => state.user.user)
   React.useEffect(() => {
     try {
 

@@ -13,6 +13,7 @@ import {
     GridToolbarContainer,
     GridActionsCellItem,
     GridRowEditStopReasons,
+    GridToolbar,
 } from '@mui/x-data-grid';
 import {
     randomId,
@@ -33,9 +34,10 @@ function EditToolbar(props) {
 
     return (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+            <Button color="primary" variant='contained' size='small' startIcon={<AddIcon />} onClick={handleClick}>
                 Add Employee
             </Button>
+            <GridToolbar></GridToolbar>
         </GridToolbarContainer>
     );
 }
@@ -46,7 +48,6 @@ const CrewList = () => {
     const [loading, setLoading] = useState(true);
     const [rowModesModel, setRowModesModel] = React.useState({});
     const [designations, setDesignations] = React.useState([])
-    const [selectionModel, setSelectionModel] = useState([]);
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
@@ -85,7 +86,7 @@ const CrewList = () => {
     const processRowUpdate = async (newRow) => {
         const updatedRow = { ...newRow, isNew: false };
         setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
-        newRow.isNew !== true ? await axios.put(`${base_url}/employee/${newRow.empNumber}`, newRow, {
+        newRow.isNew !== true ? await axios.put(`${base_url}/employee/${newRow.id}`, newRow, {
             headers: {
                 'authorization': localStorage.getItem('token'),
             }
@@ -102,20 +103,20 @@ const CrewList = () => {
     };
     const columns = [
 
-        { field: 'Name', headerName: 'Name', width: 200, editable: true },
-        { field: 'empNumber', headerName: 'Employee Number', width: 200, editable: true },
-        { field: 'crew', headerName: 'Crew', width: 175, editable: true, type: 'singleSelect', valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
+        { field: 'Name', headerName: 'Name', editable: true, width: 175 },
+        { field: 'empNumber', headerName: 'Employee Number', editable: true, width: 175 },
+        { field: 'crew', headerName: 'Crew', editable: true, type: 'singleSelect', width: 175, valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
         {
-            field: 'Designation', headerName: 'Designation', width: 175, editable: true, type: 'singleSelect', valueOptions: designations
+            field: 'Designation', headerName: 'Designation', editable: true, width: 175, type: 'singleSelect', valueOptions: designations
         },
-        { field: 'unit', headerName: 'Unit', width: 200, editable: true, type: 'singleSelect', valueOptions: ['Hoist 1', 'Hoist 2', 'Hoist 3'] },
-
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 100,
+            width: 175,
             cellClassName: 'actions',
+            headerClassName: 'sticky-header',
+            cellClassName: 'sticky-cell',
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -171,7 +172,6 @@ const CrewList = () => {
                     Name: employee.Name,
                     empNumber: employee.empNumber,
                     Designation: employee.Designation,
-                    unit: employee.unit,
                     crew: employee.crew
                 }));
                 setUsers(employeeData);
@@ -192,10 +192,10 @@ const CrewList = () => {
     }, []);
 
     return (
-        
+
         <Container>
             <Box sx={{
-
+                height: '100%',
                 width: '100%',
                 '& .actions': {
                     color: 'text.secondary',
@@ -203,10 +203,8 @@ const CrewList = () => {
                 '& .textPrimary': {
                     color: 'text.primary',
                 },
-                '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
-                },
-                backgroundColor: '#f3f3f3'
+
+
             }}>
                 <Box sx={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
                     <Grid container spacing={2}>
@@ -235,15 +233,51 @@ const CrewList = () => {
                         toolbar: { setUsers, setRowModesModel },
                     }}
                     sx={{
+
+                        '& .MuiDataGrid-root': {
+                            minHeight: 300,
+                        },
                         '& .MuiDataGrid-columnHeaders': {
+                            display: 'flex',
+                            flexDirection: 'row',
                             backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
                         },
+                        '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
+                            display: 'flex',
+                            flex: 1,
+
+                        },
+                        '& .MuiDataGrid-columnHeader': {
+                            backgroundColor: '#20547b', color: 'white', fontWeight: 14,
+                        },
+
+                        '& .MuiDataGrid-columnHeaders': {
+                            backgroundColor: '#20547b',
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 1000,
+                        },
+                        '& .MuiDataGrid-columnHeader--sticky-right': {
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .MuiDataGrid-cell--sticky-right': {
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .sticky-header': {
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .sticky-cell': {
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: 'white',
+                            zIndex: 1000,
+                        },
                     }}
-                    checkboxSelection
-                    onSelectionModelChange={(newSelectionModel) => {
-                        setSelectionModel(newSelectionModel);
-                      }}
-                      selectionModel={selectionModel}
                 />
             </Box>
         </Container>

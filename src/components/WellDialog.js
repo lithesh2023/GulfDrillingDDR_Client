@@ -6,9 +6,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-
+import AddIcon from '@mui/icons-material/Add';
 import { TextField, Button, Container, Typography, Grid } from '@mui/material'
-import axios from 'axios'
+
+import { useSelector, useDispatch } from 'react-redux';
+import { addWell } from '../redux/actions/wellActions';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -17,18 +20,20 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const base_url = "http://localhost:4000/api/v1"
-export default function CustomizedDialog(props) {
-  const {unit} =props
+
+
+export default function WellDialog() {
+
+  const user = useSelector((state) => state.user.user)
+  const dispatch = useDispatch()
+  const { unit } = user
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
-    await axios.post(`${base_url}/well`, data, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    })
+   
+    dispatch(addWell(data))
+    
     handleClose()
     setFormData({
       well_number: '',
@@ -64,7 +69,7 @@ export default function CustomizedDialog(props) {
 
   return (
     <React.Fragment>
-      <Button color='success' onClick={handleClickOpen}>
+      <Button color='primary' onClick={handleClickOpen} size='small' variant='contained' startIcon={<AddIcon></AddIcon>}>
         Add well
       </Button>
       <BootstrapDialog

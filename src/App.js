@@ -95,7 +95,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function App() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const [user, setUser] = React.useState({})
 
   const toggleDrawer = () => {
@@ -192,14 +192,14 @@ export default function App() {
                     <Route path="/" >
                       {/* <Route index element={<Login />} /> */}
 
-                      <Route path="Login" element={<Login onData={getUser} />} />
+                      <Route path="Login" element={<Login />} />
                       <Route path="Register" element={<Registration />} />
                       <Route path="/" element={<PrivateRoute />}>
-                        <Route path="Dashboard" element={<Dashboard user={user}/>} />
-                        <Route path="Well" element={<Well user={user}/>} />
+                        <Route path="Dashboard" element={<Dashboard/>} />
+                        <Route path="Well" element={<Well />} />
                         <Route path="Operation/:id" element={<Operation />} />
-                        <Route path="Employees" element={<POBList></POBList>} />
-                        <Route path="Profile" element={<UserProfile user={user}></UserProfile>} />
+                        <Route path="Employees" element={<div><POBList></POBList><CrewList></CrewList></div>} />
+                        <Route path="Profile" element={<UserProfile></UserProfile>} />
                       </Route>
 
                     </Route>

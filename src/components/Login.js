@@ -5,31 +5,26 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../redux/actions/userAction'
 
 const base_url = "http://localhost:4000/api/v1"
-const Login = ({onData}) => {
-     const navigate = useNavigate();
+const Login = () => {
+    const navigate = useNavigate();
     const { login } = useAuth();
+    const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
+
     const handleLogin = async (e) => {
         e.preventDefault();
         // Handle login logic here
-        axios.post(`${base_url}/user/login`, { email, password }).then((result)=>{
-            
-            localStorage.setItem('token',result.data.token)
-            onData(result.data.currentUser)
-            login()
-            navigate('/Dashboard')
-        })
-       
-        
+        const userCredentials = { email, password }
+        dispatch(setUser(userCredentials,navigate,login))
     };
 
     return (
-        <Container maxWidth="sm" sx={{maxWidth:'400px'}}>
+        <Container maxWidth="sm" sx={{ maxWidth: '400px' }}>
             <Box display="flex" flexDirection="column" alignItems="center">
                 <Typography variant="h4">Login</Typography>
                 <TextField
@@ -53,7 +48,7 @@ const Login = ({onData}) => {
                     InputLabelProps={{ shrink: true }}
                     fullWidth
                 />
-                <Button variant="contained" color="primary"  onClick={handleLogin} sx={{ mt: 2 }}>
+                <Button variant="contained" color="primary" onClick={handleLogin} sx={{ mt: 2 }}>
                     Login
                 </Button>
                 <Box display="flex" justifyContent="space-between" width='100%' mt={2}>

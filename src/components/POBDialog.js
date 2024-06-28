@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Button, Container, Typography, Grid } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios'
 
 import { useGridApiRef, DataGrid, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid'
@@ -39,13 +40,14 @@ export default function POBDialog(props) {
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarDensitySelector />
-        {/* GridToolbarExport is omitted to hide the export button */}
-        <Button color="primary" variant='contained' size='small' onClick={handleGetSelectedRows}>
+        <Button color="primary" variant='contained' size='small' onClick={handleGetSelectedRows} startIcon={<AddIcon></AddIcon>}>
           Add to POB
         </Button>
+        <GridToolbarColumnsButton />
+        {/* <GridToolbarFilterButton />
+        <GridToolbarDensitySelector /> */}
+        {/* GridToolbarExport is omitted to hide the export button */}
+
 
       </GridToolbarContainer>
     );
@@ -62,16 +64,17 @@ export default function POBDialog(props) {
       }
 
     });
+    handleClose()
   };
 
   const columns = [
     {
-      field: 'Name', headerName: 'Name', width: 175, editable: false, headerClassName: 'sticky-header',
+      field: 'Name', headerName: 'Name', editable: false, headerClassName: 'sticky-header',
       cellClassName: 'sticky-cell'
     },
-    { field: 'empNumber', headerName: 'Employee Number', width: 150, editable: false },
-    { field: 'crew', headerName: 'Crew', width: 150, editable: false },
-    { field: 'Designation', headerName: 'Designation', width: 150, editable: false, }
+    { field: 'empNumber', headerName: 'Employee Number', editable: false },
+    { field: 'crew', headerName: 'Crew', editable: false },
+    { field: 'Designation', headerName: 'Designation', editable: false, }
   ];
   useEffect(() => {
     const fetchUsers = async () => {
@@ -105,7 +108,7 @@ export default function POBDialog(props) {
 
     <React.Fragment>
       <ThemeProvider theme={theme}>
-        <Button color='primary' onClick={handleClickOpen} variant='contained' size='small'>
+        <Button color='primary' onClick={handleClickOpen} variant='contained' size='small' startIcon={<AddIcon></AddIcon>}>
           Add to POB list
         </Button>
         <BootstrapDialog
@@ -169,6 +172,7 @@ export default function POBDialog(props) {
                     backgroundColor: 'white',
                     zIndex: 1000,
                   },
+
                 }}
               />
 

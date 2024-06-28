@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
 import { Grid, Typography } from '@mui/material';
 import {
     GridRowModes,
@@ -18,15 +19,7 @@ import {
 import { Box, Container } from '@mui/material';
 import axios from 'axios';
 import POBDialog from './POBDialog';
-import { makeStyles } from '@mui/styles';
-const useStyles = makeStyles({
-    stickyColumn: {
-      position: 'sticky',
-      left: 0,
-      backgroundColor: 'white', // Ensures the sticky column has a background
-      zIndex: 1, // Ensures it stays above other columns
-    },
-  });
+
 function EditToolbar(props) {
     const { setUsers, setRowModesModel } = props;
 
@@ -49,7 +42,7 @@ function EditToolbar(props) {
 
 const base_url = "http://localhost:4000/api/v1"
 const POBList = () => {
-    const classes = useStyles();
+  
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', {
         weekday: 'long',
@@ -73,7 +66,7 @@ const POBList = () => {
     };
 
     const handleDeleteClick = (id) => async () => {
-        await axios.put(`${base_url}/employee/${id}`,{POBDate:'',unit:''}, {
+        await axios.put(`${base_url}/employee/${id}`, { POBDate: '', unit: '' }, {
             headers: {
                 'authorization': localStorage.getItem('token'),
             }
@@ -113,24 +106,29 @@ const POBList = () => {
     };
     const columns = [
 
-        { field: 'Name', headerName: 'Name', width: 175, editable: false ,headerClassName: 'sticky-header',
-            cellClassName: 'sticky-column' },
-        { field: 'empNumber', headerName: 'Employee Number', width: 150, editable: false },
-        { field: 'POBDate', headerName: 'POB Date',type:'date', width: 150, editable: false ,valueGetter: (row) => {
-            return new Date(row ? row : '');
-          },},
-        { field: 'crew', headerName: 'Crew', width: 150, editable: false, type: 'singleSelect', valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
         {
-            field: 'Designation', headerName: 'Designation', width: 175, editable: false, type: 'singleSelect', valueOptions: designations
+            field: 'Name', headerName: 'Name', editable: false, width: 150, 
         },
-        { field: 'unit', headerName: 'Unit', width: 150, editable: false, type: 'singleSelect', valueOptions: ['Hoist 1', 'Hoist 2', 'Hoist 3'] },
+        { field: 'empNumber', headerName: 'Employee Number', editable: false, width: 150 },
+        {
+            field: 'POBDate', headerName: 'POB Date', type: 'date', editable: false, width: 150, valueGetter: (row) => {
+                return new Date(row ? row : '');
+            },
+        },
+        { field: 'crew', headerName: 'Crew', editable: false, width: 150, type: 'singleSelect', valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
+        {
+            field: 'Designation', headerName: 'Designation', width: 150, editable: false, type: 'singleSelect', valueOptions: designations
+        },
+        { field: 'unit', headerName: 'Unit', editable: false, width: 150, type: 'singleSelect', valueOptions: ['Hoist 1', 'Hoist 2', 'Hoist 3'] },
 
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 100,
+            width: 150,
             cellClassName: 'actions',
+            headerClassName: 'sticky-header',
+            cellClassName: 'sticky-cell',
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -182,7 +180,7 @@ const POBList = () => {
                     Designation: employee.Designation,
                     unit: employee.unit,
                     crew: employee.crew,
-                    POBDate:employee.POBDate
+                    POBDate: employee.POBDate
                 }));
                 setUsers(employeeData);
 
@@ -204,7 +202,7 @@ const POBList = () => {
     return (
         <Container>
             <Box sx={{
-                
+                height: '100%',
                 width: '100%',
                 '& .actions': {
                     color: 'text.secondary',
@@ -215,7 +213,7 @@ const POBList = () => {
                 '& .MuiDataGrid-columnHeaders': {
                     backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
                 },
-                backgroundColor: '#f3f3f3'
+
             }}>
                 <Box sx={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
                     <Grid container spacing={2}>
@@ -244,8 +242,49 @@ const POBList = () => {
                         toolbar: { setUsers, setRowModesModel },
                     }}
                     sx={{
+
+                        '& .MuiDataGrid-root': {
+                            minHeight: 300,
+                        },
                         '& .MuiDataGrid-columnHeaders': {
+                            display: 'flex',
+                            flexDirection: 'row',
                             backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
+                        },
+                        '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
+                            display: 'flex',
+                            flex: 1,
+
+                        },
+                        '& .MuiDataGrid-columnHeader': {
+                            backgroundColor: '#20547b', color: 'white', fontWeight: 14,
+                        },
+
+                        '& .MuiDataGrid-columnHeaders': {
+                            backgroundColor: '#20547b',
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 1000,
+                        },
+                        '& .MuiDataGrid-columnHeader--sticky-right': {
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .MuiDataGrid-cell--sticky-right': {
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .sticky-header': {
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: '#20547b',
+                            zIndex: 1000,
+                        },
+                        '& .sticky-cell': {
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: 'white',
+                            zIndex: 1000,
                         },
                     }}
                 />
