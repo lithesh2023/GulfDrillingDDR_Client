@@ -17,18 +17,21 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import LaunchIcon from '@mui/icons-material/Launch';
 import SubOperationDialog from './SubOperationDialog';
 import OperationDialog from './OperationDialog';
-import axios from 'axios'
+
 import { useNavigate } from 'react-router-dom';
-const base_url = "http://localhost:4000/api/v1"
+import {useDispatch,useSelector} from 'react-redux'
+import {setWell,fetchOperations} from '../redux/actions/operationAction'
+import { FileDownloadDoneSharp, FileDownloadOutlined } from '@mui/icons-material';
+
 
 
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-
+  
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'set' }, backgroundColor: '#dcdcdd' }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'set' }, backgroundColor: '#fffff' }}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -46,7 +49,7 @@ function Row(props) {
         <TableCell align="right">{row.Plan_HRS}</TableCell>
         <TableCell align="right">{row.Plan_HRS}</TableCell>
         <TableCell align="right">{row.description}</TableCell>
-        <TableCell align="right"><SubOperationDialog id={row.id}></SubOperationDialog></TableCell>
+        <TableCell align="right"><SubOperationDialog data={{id:row.id,op_code:row.operation_code}}></SubOperationDialog></TableCell>
       </TableRow>
       <TableRow >
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
@@ -71,7 +74,7 @@ function Row(props) {
                 <TableBody>
                   {row.subOpns ?
                     row.subOpns.map((subOpnRow) => (
-                      <TableRow key={subOpnRow.StartTime} sx={{ backgroundColor: '#cfd7dd' }}>
+                      <TableRow key={subOpnRow.StartTime} sx={{ backgroundColor: '#f3f3f3' }}>
                         <TableCell component="th" scope="row">
                           {subOpnRow.StartTime}
                         </TableCell>
@@ -125,12 +128,13 @@ function Row(props) {
 
 
 
-export default function CollapsibleTable(props) {
+export default function CollapsibleTable() {
 
-  const [rows, setRows] = React.useState([]);
-  const [well, setWell] = React.useState(props);
-
-
+  // const [rows, setRows] = React.useState([]);
+  // const [well, setWell] = React.useState(props);
+  const dispatch = useDispatch()
+  const well = useSelector((state)=>state.operations.well)
+  const rows = useSelector((state)=>state.operations.operations)
   const navigate = useNavigate()
   const handleClick = () => {
     navigate('/Well')
@@ -138,25 +142,16 @@ export default function CollapsibleTable(props) {
 
   // Call fetchData on component mount
   React.useEffect(() => {
-    fetchData();
-  }, []);
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`${base_url}/operation${well._id ? '/' + well._id : ''}`, {
-        headers: {
-          'authorization': localStorage.getItem('token'),
-        }
-      });
-      setRows(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    console.log("well",well)
+    dispatch(fetchOperations(well._id))
+  }, [dispatch]);
+
   return (
     <TableContainer component={Paper}>
-      <Box sx={{ backgroundColor: '#cfd7e3' }}>
+      <Box sx={{ backgroundColor: '#fffff' }}>
         <OperationDialog well_number={well.well_number} id={well._id} ></OperationDialog>
-        <Button startIcon={<LaunchIcon></LaunchIcon>} variant='outlined' onClick={handleClick}>Well</Button>
+        <Button startIcon={<LaunchIcon></LaunchIcon>} variant='contained' size='small' onClick={handleClick} sx={{margin:'4px'}}>Well</Button>
+        <Button startIcon={<FileDownloadOutlined></FileDownloadOutlined>} variant='contained' size='small' sx={{margin:'4px'}}>Export</Button>
       </Box>
       <Table aria-label="collapsible table">
         <TableHead>
@@ -164,13 +159,13 @@ export default function CollapsibleTable(props) {
             p: 2, borderRadius: '6px', width: '100%', backgroundColor: '#20547b',
           }}>
             <TableCell />
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }}>Operation Code</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Day Number</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Date</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Plan Hours</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Actual Hours</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Description</TableCell>
-            <TableCell sx={{ color: 'white', fontWeight: 'large' }} align="right">Action</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'20%' }}>Operation Code</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Day Number</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Date</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Plan Hours</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Actual Hours</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Description</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'large', width:'15%' }} align="right">Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

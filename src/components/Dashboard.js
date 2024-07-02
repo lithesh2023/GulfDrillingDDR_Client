@@ -20,7 +20,7 @@ import Slideshow from './Slideshow';
 import{useSelector} from 'react-redux'
 
 const defaultTheme = createTheme();
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 export default function Dashboard(props) {
   const [userCount, setUserCount] = React.useState([]);
   const [wellCount, setWellCount] = React.useState([]);

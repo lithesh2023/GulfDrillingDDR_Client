@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { IconButton, Avatar, Menu, MenuItem } from '@mui/material';
-import { useAuth } from './AuthContext';
+
 import { useNavigate } from 'react-router-dom';
-const UserAvatar = (props) => {
-    const { logout } = useAuth();
+import {useSelector,useDispatch} from 'react-redux'
+import {setUser} from '../redux/actions/userAction'
+const UserAvatar = () => {
+    
     const [anchorEl, setAnchorEl] = useState(null);
     const navigate = useNavigate()
-    const user = props.user
+    const user = useSelector((state) => state.user.user)
+    const dispatch = useDispatch()
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -14,6 +17,10 @@ const UserAvatar = (props) => {
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
+    const logout =()=>{
+        dispatch(setUser({}))
+        localStorage.setItem('token', "");
+    }
     const openProfile = () => {
         navigate('/Profile')
         setAnchorEl(null);
@@ -32,7 +39,7 @@ const UserAvatar = (props) => {
                 <MenuItem >{user.name}</MenuItem>
                 <MenuItem onClick={openProfile}>Profile</MenuItem>
 
-                <MenuItem onClick={() => { handleMenuClose(); logout(); localStorage.setItem('token', ""); window.location.href = '/' }}>Logout</MenuItem>
+                <MenuItem onClick={() => { handleMenuClose(); logout();  window.location.href = '/' }}>Logout</MenuItem>
             </Menu>
         </div>
     );

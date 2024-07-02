@@ -8,8 +8,10 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
 import { TextField, Button, Container, Typography, Grid } from '@mui/material'
-import axios from 'axios'
+
 import { Add } from '@mui/icons-material';
+import {useDispatch,useSelector} from 'react-redux'
+import {addOperation,fetchOperationKey} from '../redux/actions/operationAction'
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -18,19 +20,16 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const base_url = "http://localhost:4000/api/v1"
+
 export default function OperationDialog(props) {
+  const dispatch = useDispatch()
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     let data = Object.fromEntries(formData.entries());
     data = {...data,well:props.id}
-    const token = localStorage.getItem('token')
-    await axios.post(`${base_url}/operation`, data, {
-      headers: {
-        'authorization': token,
-      }
-    })
+    
+    dispatch(addOperation(data))
     handleClose()
     setFormData({
       StartDate: '',
@@ -54,25 +53,14 @@ export default function OperationDialog(props) {
     createdBy: '',
     well: '',
   });
-  const [operationCode,setOperationCode] =React.useState([])
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`${base_url}/key/mainOperationCode`, {
-        headers: {
-          'authorization': localStorage.getItem('token'),
-        }
-      });
-      console.log(response.data)
-      setOperationCode(response.data[0].values);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  
+  const operationCode = useSelector((state)=> state.operations.mainOperationCode)
+  const today = new Date().toISOString().split('T')[0];
 
   // Call fetchData on component mount
   React.useEffect(() => {
-    fetchData();
-  }, []);
+    dispatch(fetchOperationKey('mainOperationCode'))
+  }, [dispatch]);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -88,7 +76,7 @@ export default function OperationDialog(props) {
 
   return (
     <React.Fragment>
-      <Button startIcon={<Add></Add>} onClick={handleClickOpen} variant="outlined" sx={{margin:'4px'}}>
+      <Button startIcon={<Add></Add>} onClick={handleClickOpen} variant="contained"  size='small' sx={{margin:'4px'}}>
         Add Operation
       </Button>
       <BootstrapDialog
@@ -119,7 +107,7 @@ export default function OperationDialog(props) {
             <form onSubmit={handleSubmit}>
 
               <Grid container spacing={2}>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Well ID"
@@ -132,7 +120,7 @@ export default function OperationDialog(props) {
                     }}
                     disabled
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -144,6 +132,9 @@ export default function OperationDialog(props) {
                     required
                     InputLabelProps={{
                       shrink: true,
+                    }}
+                    inputProps={{
+                      min: today,
                     }}
                   />
                 </Grid>
@@ -183,7 +174,7 @@ export default function OperationDialog(props) {
                     required
                   >
                     
-                   {operationCode.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
+                   {operationCode?.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
                     
                   </TextField>
                 </Grid>

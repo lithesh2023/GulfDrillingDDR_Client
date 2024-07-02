@@ -38,7 +38,7 @@ export const mainListItems = (
         <ListItemText primary="Employees" />
       </ListItemButton>
     </Link>
-    <Link to="/Report" style={{ textDecoration: 'none' }}>
+    <Link to="/Fuel" style={{ textDecoration: 'none' }}>
       <ListItemButton>
         <ListItemIcon>
           <BarChartIcon />

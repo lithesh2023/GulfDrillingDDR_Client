@@ -64,7 +64,7 @@ export default function WellDialog() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
+  const today = new Date().toISOString().split('T')[0];
 
 
   return (
@@ -122,6 +122,9 @@ export default function WellDialog() {
                     required
                     InputLabelProps={{
                       shrink: true,
+                    }}
+                    inputProps={{
+                      min: today,
                     }}
                   />
                 </Grid>

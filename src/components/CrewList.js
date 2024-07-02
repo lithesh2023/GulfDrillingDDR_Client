@@ -42,7 +42,7 @@ function EditToolbar(props) {
     );
 }
 
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 const CrewList = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -103,17 +103,17 @@ const CrewList = () => {
     };
     const columns = [
 
-        { field: 'Name', headerName: 'Name', editable: true, width: 175 },
-        { field: 'empNumber', headerName: 'Employee Number', editable: true, width: 175 },
-        { field: 'crew', headerName: 'Crew', editable: true, type: 'singleSelect', width: 175, valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
+        { field: 'Name', headerName: 'Name', editable: true, width: 200 },
+        { field: 'empNumber', headerName: 'Employee Number', editable: true, width: 200 },
+        { field: 'crew', headerName: 'Crew', editable: true, type: 'singleSelect', width: 200, valueOptions: ['A CREW', 'B CREW', 'C CREW', 'D CREW', 'THIRD PARTY CREW'] },
         {
-            field: 'Designation', headerName: 'Designation', editable: true, width: 175, type: 'singleSelect', valueOptions: designations
+            field: 'Designation', headerName: 'Designation', editable: true, width: 270, type: 'singleSelect', valueOptions: designations
         },
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 175,
+            width: 200,
             cellClassName: 'actions',
             headerClassName: 'sticky-header',
             cellClassName: 'sticky-cell',

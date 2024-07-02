@@ -8,10 +8,10 @@ import { useAuth } from './AuthContext';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../redux/actions/userAction'
 
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,7 +20,7 @@ const Login = () => {
         e.preventDefault();
         // Handle login logic here
         const userCredentials = { email, password }
-        dispatch(setUser(userCredentials,navigate,login))
+        dispatch(setUser(userCredentials,navigate))
     };
 
     return (

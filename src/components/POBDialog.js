@@ -21,7 +21,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 const theme = createTheme();
 
 

@@ -7,8 +7,12 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
-import { TextField, Button, Container, Typography, Grid } from '@mui/material'
-import axios from 'axios'
+import AddIcon from '@mui/icons-material/Add';
+
+import { TextField, Button, Container, Typography, Grid, Divider } from '@mui/material'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchOperationKey ,addSubOperation} from '../redux/actions/operationAction'
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -17,46 +21,23 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const base_url = "http://localhost:4000/api/v1"
+
 export default function SubOperationDialog(props) {
-
-  const [operationCode,setOperationCode] =React.useState([])
-  const [category,setCategory] =React.useState([])
-  const fetchData = async () => {
-    try {
-      const opCodeResult = await axios.get(`${base_url}/key/SubOperationCode`, {
-        headers: {
-          'authorization': localStorage.getItem('token'),
-        }
-      });
-      
-      setOperationCode(opCodeResult.data[0].values);
-      const categoryResult = await axios.get(`${base_url}/key/Category`, {
-        headers: {
-          'authorization': localStorage.getItem('token'),
-        }
-      });
-      
-      setCategory(categoryResult.data[0].values);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
+  const dispatch = useDispatch()
+  const subOpCode = useSelector((state) => state.operations.SubOperationCode)
+  const category = useSelector((state) => state.operations.Category)
+  const well = useSelector((state)=> state.operations.well)
   // Call fetchData on component mount
   React.useEffect(() => {
-    fetchData();
+    dispatch(fetchOperationKey('SubOperationCode'))
+    dispatch(fetchOperationKey('Category'))
   }, []);
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     let data = Object.fromEntries(formData.entries());
-    data = {...data,Operation:props.id}
-    await axios.post(`${base_url}/sub-operation`, data, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    })
+    data = { ...data, Operation: props.data.id }
+    dispatch(addSubOperation(data,well))
     handleClose()
     setFormData({
       StartTime: '',
@@ -94,15 +75,15 @@ export default function SubOperationDialog(props) {
 
   return (
     <React.Fragment>
-      <Button color='success' onClick={handleClickOpen}>
-        +
+      <Button color='success' size='small' onClick={handleClickOpen} startIcon={<AddIcon></AddIcon>}>
+        Add
       </Button>
       <BootstrapDialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
       >
-        <DialogTitle sx={{ m: 0, p: 2 ,backgroundColor: '#4caf50'}} id="customized-dialog-title">
+        <DialogTitle sx={{ m: 0, p: 2, backgroundColor: '#4caf50' }} id="customized-dialog-title">
           Create Sub Operation
         </DialogTitle>
         <IconButton
@@ -119,13 +100,14 @@ export default function SubOperationDialog(props) {
         </IconButton>
         <DialogContent dividers>
           <Container>
-            <Typography variant="h4" align="center" gutterBottom>
-            Operation Code  - {props.id}
+            <Typography variant="h6" align="center" gutterBottom>
+              Operation Code : {props.data.op_code}
             </Typography>
+            <Divider sx={{ my: 1 }}></Divider>
             <form onSubmit={handleSubmit}>
 
               <Grid container spacing={2}>
-              <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Operation ID"
@@ -138,7 +120,7 @@ export default function SubOperationDialog(props) {
                     }}
                     disabled
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -167,7 +149,7 @@ export default function SubOperationDialog(props) {
                     }}
                   />
                 </Grid>
-                
+
 
                 <Grid item xs={12}>
                   <TextField
@@ -183,7 +165,7 @@ export default function SubOperationDialog(props) {
                     <MenuItem value="NPT">NPT</MenuItem>
                   </TextField>
                 </Grid>
-                
+
                 <Grid item xs={12}>
 
                   <TextField
@@ -195,7 +177,7 @@ export default function SubOperationDialog(props) {
                     fullWidth
                     required
                   >
-                    {category.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
+                    {category?.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
                   </TextField>
                 </Grid>
                 <Grid item xs={12}>
@@ -208,7 +190,7 @@ export default function SubOperationDialog(props) {
                     fullWidth
                     required
                   >
-                    {operationCode.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
+                    {subOpCode?.map((code) => <MenuItem value={code}>{code}</MenuItem>)}
                   </TextField>
                 </Grid>
                 <Grid item xs={12}>

@@ -32,6 +32,8 @@ import Employees from './components/Employees'
 import UserProfile from './components/UserProfile';
 import CrewList from './components/CrewList';
 import POBList from './components/POBList';
+import {useSelector} from 'react-redux'
+import Fuel from './components/Fuel';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -46,7 +48,8 @@ function Copyright(props) {
 }
 
 const drawerWidth = 240;
-
+const apiUrl = process.env.REACT_APP_API_URL;
+console.log("apiUrl",apiUrl);
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
@@ -95,15 +98,11 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const defaultTheme = createTheme();
 
 export default function App() {
-  const [open, setOpen] = React.useState(true);
-  const [user, setUser] = React.useState({})
-
+  const [open, setOpen] = React.useState(false);
+  const user = useSelector((state) => state.user.user)
   const toggleDrawer = () => {
     setOpen(!open);
   };
-  function getUser(data) {
-    setUser(data);
-  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -116,7 +115,7 @@ export default function App() {
               backgroundColor: '#19445b'
             }}
           >
-            {localStorage.getItem('token') && <IconButton
+            {user.name && <IconButton
               edge="start"
               color="inherit"
               aria-label="open drawer"
@@ -138,16 +137,16 @@ export default function App() {
             >
               Gulf Drilling DDR
             </Typography>
-            {localStorage.getItem('token') && <IconButton color="inherit">
+            {user.name && <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>}
 
-            {localStorage.getItem('token') && <UserAvatar user={user}></UserAvatar>}
+            {user.name && <UserAvatar ></UserAvatar>}
           </Toolbar>
         </AppBar>
-        {localStorage.getItem('token') && <Drawer variant="permanent" open={open} >
+        {user.name && <Drawer variant="permanent" open={open} >
 
 
           <Toolbar
@@ -200,6 +199,7 @@ export default function App() {
                         <Route path="Operation/:id" element={<Operation />} />
                         <Route path="Employees" element={<div><POBList></POBList><CrewList></CrewList></div>} />
                         <Route path="Profile" element={<UserProfile></UserProfile>} />
+                        <Route path="Fuel" element={<Fuel></Fuel>} />
                       </Route>
 
                     </Route>

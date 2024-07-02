@@ -39,7 +39,7 @@ function EditToolbar(props) {
     );
 }
 
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 const Employees = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);

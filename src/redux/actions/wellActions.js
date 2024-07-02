@@ -1,7 +1,7 @@
 // src/actions/dataActions.js
 import axios from 'axios';
 
-const base_url = 'http://localhost:4000/api/v1'
+const base_url = process.env.REACT_APP_API_URL
 export const getWells = () => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });

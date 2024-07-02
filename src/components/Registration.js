@@ -3,7 +3,7 @@ import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-const base_url = "http://localhost:4000/api/v1"
+const base_url = process.env.REACT_APP_API_URL
 const Registration = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const Registration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    console.log('Form Data:', formData);
+
 
     // const data = Object.fromEntries(formData.entries());
     await axios.post(`${base_url}/user/register`, formData, {
@@ -46,7 +46,7 @@ const Registration = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{width:400}}>
+    <Container maxWidth="sm" sx={{ maxWidth: '400px' }}>
       <Box display="flex" flexDirection="column" alignItems="center" mt={8}>
         <Typography variant="h4">User Registration</Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
