@@ -77,7 +77,7 @@ export default function Dashboard(props) {
               footerText="View Details"
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          {/* <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
               title="Fuel"
               value="$12,345"
@@ -86,7 +86,7 @@ export default function Dashboard(props) {
               link="/report"
               footerText="See More"
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
               title="Active wells"

@@ -11,7 +11,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { Link } from 'react-router-dom'
 import OilRigIcon from './OilRigIcon';
-import { OilBarrelTwoTone } from '@mui/icons-material';
+import { LocalGasStation, OilBarrelTwoTone } from '@mui/icons-material';
 export const mainListItems = (
   <React.Fragment>
     <Link to="/Dashboard" style={{ textDecoration: 'none' }}>
@@ -41,7 +41,7 @@ export const mainListItems = (
     <Link to="/Fuel" style={{ textDecoration: 'none' }}>
       <ListItemButton>
         <ListItemIcon>
-          <BarChartIcon />
+         <LocalGasStation></LocalGasStation>
         </ListItemIcon>
         <ListItemText primary="Fuel" />
       </ListItemButton>

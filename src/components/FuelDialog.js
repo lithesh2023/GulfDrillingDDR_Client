@@ -7,10 +7,11 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import { TextField, Button, Container, Typography, Grid } from '@mui/material'
+import { TextField, Button, Container, Typography, Grid, MenuItem } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
-import { addWell } from '../redux/actions/wellActions';
+import { addFuel, addFuelConsumption } from '../redux/actions/fuelAction'
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -22,7 +23,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 
-export default function WellDialog() {
+export default function FuelDialog(props) {
 
   const user = useSelector((state) => state.user.user)
   const dispatch = useDispatch()
@@ -31,27 +32,27 @@ export default function WellDialog() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
-   
-    dispatch(addWell(data))
-    
+    (props.type === 'Consume') ? dispatch(addFuelConsumption(data)) : dispatch(addFuel(data))
+
+
     handleClose()
     setFormData({
-      well_number: '',
-      rig_up_date: '',
-      job_type: '',
-      client: '',
+      date: '',
+      type: '',
+      number: '',
+      location: '',
+      volume: '',
       unit: '',
-      lti_days: ''
     })
   };
   const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    well_number: '',
-    rig_up_date: '',
-    job_type: '',
-    client: '',
+    date: '',
+    number: '',
+    type: '',
+    location: '',
+    volume: '',
     unit: '',
-    lti_days: ''
   });
 
   const handleClickOpen = () => {
@@ -70,7 +71,7 @@ export default function WellDialog() {
   return (
     <React.Fragment>
       <Button color='primary' onClick={handleClickOpen} size='small' variant='contained' startIcon={<AddIcon></AddIcon>}>
-        Add well
+        Add Fuel {props.type === "Consume" ?'Consumption':'Filling'}
       </Button>
       <BootstrapDialog
         onClose={handleClose}
@@ -78,7 +79,7 @@ export default function WellDialog() {
         open={open}
       >
         {/* <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Create Well
+          Create Fuel Consumption
         </DialogTitle> */}
         <IconButton
           aria-label="close"
@@ -95,29 +96,19 @@ export default function WellDialog() {
         <DialogContent dividers>
           <Container>
             <Typography variant="h4" align="center" gutterBottom>
-              Well Details
+              Fuel {props.type === "Consume" ?'Consumption':'Filling'} Details
             </Typography>
             <form onSubmit={handleSubmit}>
 
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    type="text"
-                    label="Well Number"
-                    name="well_number"
-                    value={formData.well_number}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
                     type="date"
-                    label="Rig Up Date"
-                    name="rig_up_date"
-                    value={formData.rig_up_date}
+                    label="Date"
+                    name="date"
+                    value={formData.date}
                     onChange={handleChange}
                     required
                     InputLabelProps={{
@@ -128,30 +119,48 @@ export default function WellDialog() {
                     }}
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
                     type="text"
-                    label="Job Type"
-                    name="job_type"
-                    value={formData.job_type}
+                    label="Location"
+                    name="location"
+                    value={formData.location}
                     onChange={handleChange}
                     required
-
-                  />
+                    select
+                  >
+                    <MenuItem value='Camp'>Camp</MenuItem>
+                    <MenuItem value='Rig'>Rig</MenuItem>
+                  </TextField>
                 </Grid>
-                <Grid item xs={12}>
+                {props.type === "Consume" && <Grid item xs={12}>
+                  <TextField
+                    select
+                    label="Type"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                  >
+                    <MenuItem value='Vehice'>Vehicle</MenuItem>
+                    <MenuItem value='Asset'>Asset</MenuItem>
+                  </TextField>
+                </Grid>}
+                {props.type === "Consume" && <Grid item xs={12}>
                   <TextField
                     fullWidth
                     type="text"
-                    label="Client"
-                    name="client"
-                    value={formData.client}
+                    label="Vehicle/Equipment Number"
+                    name="number"
+                    value={formData.number}
                     onChange={handleChange}
                     required
 
                   />
-                </Grid>
+                </Grid>}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -169,10 +178,10 @@ export default function WellDialog() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    type="number"
-                    label="LTI Days"
-                    name="lti_days"
-                    value={formData.lti_days}
+                    type="text"
+                    label="Fuel (Ltr)"
+                    name="volume"
+                    value={formData.volume}
                     onChange={handleChange}
                     required
                   />
