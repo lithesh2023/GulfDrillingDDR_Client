@@ -1,34 +1,29 @@
 // src/actions/dataActions.js
 import axios from 'axios';
-
 const base_url = process.env.REACT_APP_API_URL
-export const getWells = () => {
+export const getWells = (data) => {
+    
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
-            const response = await axios.get(`${base_url}/well`, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            });
-            dispatch({ type: 'GET_WELLS', payload: response.data });
+            dispatch({ type: 'GET_WELLS', payload: data });
         } catch (error) {
             dispatch({ type: 'FETCH_DATA_FAILURE', error: error.message });
         }
     };
 };
-export const addWell = (well) => {
+export const addWell = (well,token) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
             await axios.post(`${base_url}/well`, well, {
                 headers: {
-                    'authorization': localStorage.getItem('token'),
+                     'Authorization': `Bearer ${token}`,
                 }
             })
             const response = await axios.get(`${base_url}/well`, {
                 headers: {
-                    'authorization': localStorage.getItem('token'),
+                     'Authorization': `Bearer ${token}`,
                 }
             });
             dispatch({ type: 'GET_WELLS', payload: response.data });
@@ -38,19 +33,19 @@ export const addWell = (well) => {
 
     };
 };
-export const updateWell = (well) => {
+export const updateWell = (well,token) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
 
         try {
             await axios.put(`${base_url}/well/${well.id}`, well, {
                 headers: {
-                    'authorization': localStorage.getItem('token'),
+                     'Authorization': `Bearer ${token}`,
                 }
             })
             const response = await axios.get(`${base_url}/well`, {
                 headers: {
-                    'authorization': localStorage.getItem('token'),
+                     'Authorization': `Bearer ${token}`,
                 }
             });
             dispatch({ type: 'GET_WELLS', payload: response.data });
@@ -59,19 +54,19 @@ export const updateWell = (well) => {
         }
     };
 };
-export const deleteWell = (id) => {
+export const deleteWell = (id,token) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
 
         try {
             await axios.delete(`${base_url}/well/${id}`, {
                 headers: {
-                  'authorization': localStorage.getItem('token'),
+                   'Authorization': `Bearer ${token}`,
                 }
               });
             const response = await axios.get(`${base_url}/well`, {
                 headers: {
-                    'authorization': localStorage.getItem('token'),
+                     'Authorization': `Bearer ${token}`,
                 }
             });
             dispatch({ type: 'GET_WELLS', payload: response.data });

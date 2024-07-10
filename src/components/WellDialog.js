@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
+
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
@@ -10,7 +10,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { TextField, Button, Container, Typography, Grid } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
-import { addWell } from '../redux/actions/wellActions';
+
+import { axiosPrivate } from '../api/axios';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -32,8 +33,9 @@ export default function WellDialog() {
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
    
-    dispatch(addWell(data))
-    
+    await axiosPrivate.post(`/well`, data)
+    const response = await axiosPrivate.get(`/well`);
+    dispatch({ type: 'GET_WELLS', payload: response.data });
     handleClose()
     setFormData({
       well_number: '',

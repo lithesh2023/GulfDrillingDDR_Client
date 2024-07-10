@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
+
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
@@ -10,8 +10,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { TextField, Button, Container, Typography, Grid, MenuItem } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
-import { addFuel, addFuelConsumption } from '../redux/actions/fuelAction'
 
+import { useNavigate,useLocation } from 'react-router-dom';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -26,14 +27,35 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function FuelDialog(props) {
 
   const user = useSelector((state) => state.user.user)
+ 
+  const axiosPrivate =  useAxiosPrivate()
+  const navigate =useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
   const { unit } = user
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
-    (props.type === 'Consume') ? dispatch(addFuelConsumption(data)) : dispatch(addFuel(data))
-
+    if(props.type === 'Consume') 
+      {
+        axiosPrivate.post(`/fuel/consume`, data).catch(err => {
+          console.error(err)
+          navigate("/login", { state: { from: location }, replace: true })
+        })
+      }  
+    else{
+      axiosPrivate.post(`/fuel/add`, data).catch(err=>{
+        console.error(err)
+        navigate('/login',{state:{from:location},replace:true})
+      })
+    } 
+    axiosPrivate.get('/fuel').then((response) => {
+      dispatch({ type: 'FETCH_FUEL', payload: response.data });
+    }).catch(err => {
+      console.error(err)
+      navigate('/login', { state: { from: location }, replace: true })
+    })
 
     handleClose()
     setFormData({

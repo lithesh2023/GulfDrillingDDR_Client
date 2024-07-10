@@ -14,15 +14,14 @@ import {
 } from '@mui/x-data-grid';
 
 import { Box, Container } from '@mui/material';
-import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchFuel, addFuel, updateFuel } from '../redux/actions/fuelAction'
-import FuelDialog from './FuelDialog';
 
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchFuel} from '../redux/actions/fuelAction'
+import FuelDialog from './FuelDialog';
+import { useNavigate, useLocation } from 'react-router-dom'
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 function EditToolbar(props) {
-
-
   return (
     <GridToolbarContainer>
       <FuelDialog type="Consume" ></FuelDialog>
@@ -31,13 +30,17 @@ function EditToolbar(props) {
   );
 }
 
-const base_url = process.env.REACT_APP_API_URL
+
 const FuelConsumption = () => {
+  const axiosPrivate = useAxiosPrivate()
+  const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(true);
   const [rowModesModel, setRowModesModel] = React.useState({});
   const fuelData = useSelector((state) => state.fuel.fuel)
   const user = useSelector((state) => state.user.user)
+ 
   const { unit } = user
 
 
@@ -46,9 +49,8 @@ const FuelConsumption = () => {
       event.defaultMuiPrevented = true;
     }
   };
-  const counsumptionRows = fuelData.fuelConsumptionData
-
-  const receivedRows = fuelData.fuelRecievedData
+  console.log(fuelData)
+  const counsumptionRows = fuelData?.fuelConsumptionData
   const handleEditClick = (id) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
@@ -58,11 +60,8 @@ const FuelConsumption = () => {
   };
 
   const handleDeleteClick = (id) => async () => {
-    await axios.delete(`${base_url}/employee/${id}`, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    });
+
+    await axiosPrivate.delete(`/fuel/${id}`);
 
   };
 
@@ -78,10 +77,27 @@ const FuelConsumption = () => {
     }
   };
 
-  const processRowUpdate = async (newRow) => {
+  const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
+    if (newRow.isNew !== true) {
+      axiosPrivate.post(`/fuel/fuelconsumption/${newRow.id}`, newRow)
+      .catch(err => {
+        console.error(err)
+        navigate("/login", { state: { from: location }, replace: true })
+      })
+    } else {
+      axiosPrivate.post(`/fuel/consume`, newRow).catch(err => {
+        console.error(err)
+        navigate("/login", { state: { from: location }, replace: true })
+      })
+    }
+    axiosPrivate.get('/fuel').then((response) => {
+      dispatch({ type: 'FETCH_FUEL', payload: response.data });
+    }).catch(err => {
+      console.error(err)
+      navigate('/login', { state: { from: location }, replace: true })
+    })
 
-    newRow.isNew !== true ? dispatch(updateFuel(newRow)) : dispatch(addFuel(newRow))
     return updatedRow;
   };
 
@@ -148,8 +164,15 @@ const FuelConsumption = () => {
     },
   ];
   useEffect(() => {
-    dispatch(fetchFuel())
-    setLoading(false)
+    axiosPrivate.get(`/fuel`).then((response) => {
+      dispatch(fetchFuel(response.data))
+    }).catch(err => {
+      navigate('/login', { state: { from: location }, replace: true });
+    }).finally(() => {
+      setLoading(false)
+    })
+
+
   }, [dispatch]);
 
   return (
@@ -181,7 +204,7 @@ const FuelConsumption = () => {
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5, 10, 20]}
-
+          loading={loading}
           editMode="row"
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
@@ -240,7 +263,7 @@ const FuelConsumption = () => {
             },
           }}
         />
-      
+
       </Box>
 
     </Container>

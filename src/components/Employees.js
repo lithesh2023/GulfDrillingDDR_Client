@@ -17,7 +17,10 @@ import {
     randomId,
 } from '@mui/x-data-grid-generator';
 import { Box, Container } from '@mui/material';
-import axios from 'axios';
+
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 function EditToolbar(props) {
     const { setUsers, setRowModesModel } = props;
 
@@ -39,8 +42,12 @@ function EditToolbar(props) {
     );
 }
 
-const base_url = process.env.REACT_APP_API_URL
+
 const Employees = () => {
+    const axiosPrivate = useAxiosPrivate()
+    const navigate = useNavigate()
+    const location = useLocation()
+  
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [rowModesModel, setRowModesModel] = React.useState({});
@@ -58,13 +65,14 @@ const Employees = () => {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
 
-    const handleDeleteClick = (id) => async() => {
-        await axios.delete(`${base_url}/user/${id}`, {
-            headers: {
-              'authorization': localStorage.getItem('token'),
-            }
-          });
-        setUsers(users.filter((row) => row.id !== id));
+    const handleDeleteClick = (id) => () => {
+        axiosPrivate.delete(`/user/${id}`).then(() => {
+            setUsers(users.filter((row) => row.id !== id));
+        }).catch(err => {
+            console.log(err)
+            navigate('/login', { state: { from: location }, replace: true })
+        })
+
     };
 
     const handleCancelClick = (id) => () => {
@@ -79,19 +87,17 @@ const Employees = () => {
         }
     };
 
-    const processRowUpdate = async(newRow) => {
-        const updatedRow = { ...newRow, isNew: false };
-        setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
-        newRow.isNew !== true ? await axios.put(`${base_url}/user/${newRow.id}`, newRow, {
-            headers: {
-              'authorization': localStorage.getItem('token'),
-            }
-          }) : await axios.post(`${base_url}/user`, newRow, {
-            headers: {
-              'authorization': localStorage.getItem('token'),
-            }
-          })
-        return updatedRow;
+    const processRowUpdate = async (newRow) => {
+        try {
+            const updatedRow = { ...newRow, isNew: false };
+            setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
+            newRow.isNew !== true ? await axiosPrivate.put(`/user/${newRow.id}`, newRow) : await axiosPrivate.post(`/user`, newRow)
+            return updatedRow;
+        }
+        catch (error) {
+            console.log(error)
+            navigate('/login', { state: { from: location }, replace: true })
+        }
     };
 
     const handleRowModesModelChange = (newRowModesModel) => {
@@ -177,26 +183,23 @@ const Employees = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get(`${base_url}/user/`, {
-                    headers: {
-                        'authorization': localStorage.getItem('token'),
-                    }
-                });
+                const response = await axiosPrivate.get(`/user/`);
                 const userData = response.data.map((user) => ({
                     id: user._id,
                     name: user.firstname + ' ' + user.lastname,
                     email: user.email,
                     phone: user.phone,
-                    activation_code:user.activation_code,
-                    employee_number:user.employee_number,
-                    designaton:user.designaton,
-                    unit:user.unit,
-                    role:user.role
+                    activation_code: user.activation_code,
+                    employee_number: user.employee_number,
+                    designaton: user.designaton,
+                    unit: user.unit,
+                    role: user.role
 
                 }));
                 setUsers(userData);
             } catch (error) {
                 console.error('Error fetching user data:', error);
+                navigate('/login',{state:{from:location},replace:true})
             } finally {
                 setLoading(false);
             }
@@ -207,10 +210,12 @@ const Employees = () => {
 
     return (
         <Container>
-            <Box sx={{ height: 400, width: '100%' , '& .MuiDataGrid-columnHeaders': {
-          backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
-        },
-        backgroundColor: '#f3f3f3'}}>
+            <Box sx={{
+                height: 400, width: '100%', '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#20547b', color: 'black', fontWeight: 'large',
+                },
+                backgroundColor: '#f3f3f3'
+            }}>
                 <DataGrid
                     rows={users}
                     columns={columns}
@@ -230,9 +235,9 @@ const Employees = () => {
                     }}
                     sx={{
                         '& .MuiDataGrid-columnHeaders': {
-                          backgroundColor: '#20547b', color: 'white', fontWeight: 'large',
+                            backgroundColor: '#20547b', color: 'white', fontWeight: 'large',
                         },
-                      }}
+                    }}
                 />
             </Box>
         </Container>

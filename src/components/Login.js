@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-// import { useHistory } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/actions/userAction'
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from '../api/axios';
 
 const base_url = process.env.REACT_APP_API_URL
 const Login = () => {
     const navigate = useNavigate();
-    
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,12 +18,16 @@ const Login = () => {
         e.preventDefault();
         // Handle login logic here
         const userCredentials = { email, password }
-        dispatch(setUser(userCredentials,navigate))
+        const response = await axios.post(`/user/login`, userCredentials, {
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true
+        })
+        dispatch(setUser(response.data, navigate, from))
     };
 
     return (
         <Container maxWidth="sm" sx={{ maxWidth: '400px' }}>
-            <Box display="flex" flexDirection="column" alignItems="center">
+            <Box component="form" display="flex" flexDirection="column" alignItems="center">
                 <Typography variant="h4">Login</Typography>
                 <TextField
                     label="Email"

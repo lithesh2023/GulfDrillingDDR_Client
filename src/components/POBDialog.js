@@ -7,11 +7,15 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Button, Container, Typography, Grid } from '@mui/material'
+import { Button, Container } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add';
-import axios from 'axios'
 
-import { useGridApiRef, DataGrid, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid'
+
+import { useGridApiRef, DataGrid, GridToolbarContainer, GridToolbarColumnsButton } from '@mui/x-data-grid'
+import { useNavigate, useLocation } from 'react-router-dom';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchPOBCrew } from '../redux/actions/crewActions';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -21,16 +25,22 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const base_url = process.env.REACT_APP_API_URL
+
 const theme = createTheme();
 
 
 
 export default function POBDialog(props) {
 
+  const axiosPrivate = useAxiosPrivate()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = React.useState([])
+
+  const users = useSelector(state => state.crew.crew)
+  const dispatch = useDispatch()
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -57,13 +67,14 @@ export default function POBDialog(props) {
   const handleGetSelectedRows = async () => {
     const selectedRows = apiRef.current.getSelectedRows();
     const selectedData = Array.from(selectedRows.values());
+    try {
+      await axiosPrivate.put(`/employee/addCrew`, selectedData);
+      dispatch(fetchPOBCrew(axiosPrivate))
+    }
+    catch (err) {
+      navigate('/login', { state: { from: location }, replace: true });
+    }
 
-    const response = await axios.put(`${base_url}/employee/addCrew`, selectedData, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-
-    });
     handleClose()
   };
 
@@ -79,11 +90,7 @@ export default function POBDialog(props) {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${base_url}/employee/`, {
-          headers: {
-            'authorization': localStorage.getItem('token'),
-          }
-        });
+        const response = await axiosPrivate.get(`/employee/`);
 
         const employeeData = response?.data?.employees?.map((employee) => ({
           id: employee._id,
@@ -93,10 +100,12 @@ export default function POBDialog(props) {
           unit: employee.unit,
           crew: employee.crew
         }));
-        setUsers(employeeData);
+
+        dispatch({ type: "FETCH_CREW", payload: employeeData })
 
       } catch (error) {
         console.error('Error fetching user data:', error);
+        navigate('/login', { state: { from: location }, replace: true });
       } finally {
         setLoading(false);
       }
@@ -134,7 +143,7 @@ export default function POBDialog(props) {
           <DialogContent dividers>
             <Container>
               <DataGrid
-
+                loading={loading}
                 rows={users}
                 columns={columns}
                 checkboxSelection

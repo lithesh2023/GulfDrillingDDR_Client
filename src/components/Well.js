@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { useSelector, useDispatch } from 'react-redux';
-import { getWells ,addWell,updateWell,deleteWell} from '../redux/actions/wellActions';
+import { getWells, addWell, updateWell, deleteWell } from '../redux/actions/wellActions';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import LaunchIcon from '@mui/icons-material/Launch';
 import WellDialog from './WellDialog';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Grid, Typography } from '@mui/material';
 import {
   GridRowModes,
@@ -19,7 +19,7 @@ import {
   GridToolbar
 
 } from '@mui/x-data-grid';
-
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 
 function EditToolbar(props) {
@@ -27,7 +27,7 @@ function EditToolbar(props) {
 
   return (
     <GridToolbarContainer>
-      <WellDialog  />
+      <WellDialog />
       <GridToolbar></GridToolbar>
     </GridToolbarContainer>
   );
@@ -36,14 +36,14 @@ function EditToolbar(props) {
 export default function Well() {
 
   const navigate = useNavigate();
+  const location = useLocation()
+  const axiosPrivate = useAxiosPrivate();
   const [rowModesModel, setRowModesModel] = React.useState({});
   const dispatch = useDispatch();
   const rows = useSelector((state) => state.wells.wells)
   const user = useSelector((state) => state.user.user)
   const loading = useSelector((state) => state.wells.loading);
-  const error = useSelector((state) => state.wells.error);
-
-  
+  const token = useSelector((state) => state.user.token)
 
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -60,7 +60,7 @@ export default function Well() {
   };
 
   const handleDeleteClick = (id) => async () => {
-    dispatch(deleteWell(id))
+    dispatch(deleteWell(id, token))
   };
   const handleLaunchClick = (id) => async () => {
 
@@ -82,7 +82,7 @@ export default function Well() {
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
     // setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    newRow.isNew !== true ? dispatch(updateWell(newRow)) :dispatch(addWell(newRow));
+    newRow.isNew !== true ? dispatch(updateWell(newRow, token)) : dispatch(addWell(newRow, token));
     return updatedRow;
   };
 
@@ -114,6 +114,7 @@ export default function Well() {
     { field: 'client', headerName: 'Client', width: 180, editable: true },
     { field: 'unit', headerName: 'Unit', width: 150, editable: true },
     { field: 'lti_days', headerName: 'LTI days', width: 100, type: 'number', editable: true },
+    { field: 'status', headerName: 'Status', width: 100,type: 'singleSelect',valueOptions: ['Active', 'Completed', 'Not Started'], editable: true },
     {
       field: 'actions',
       type: 'actions',
@@ -174,11 +175,26 @@ export default function Well() {
     },
   ];
 
- 
+
 
   // Call fetchData on component mount
   useEffect(() => {
-    dispatch(getWells());
+    let isMounted = true;
+    // const controller = new AbortController();
+   
+    axiosPrivate.get(`/well`, {
+        // signal: controller.signal
+      }).then((response) => {
+
+        isMounted && dispatch(getWells(response.data));
+      }).catch((err) => {
+        console.log('Error: ' + err)
+        navigate('/login', { state: { from: location }, replace: true });
+      })
+    return () => {
+      isMounted = false;
+      // controller.abort();
+    }
   }, [dispatch]);
 
   return (

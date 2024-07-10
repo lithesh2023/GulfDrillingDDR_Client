@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { styled, createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import SmallBoxWidget from './SmallBoxWidget';
 import Container from '@mui/material/Container';
@@ -10,41 +10,41 @@ import Deposits from './Deposits';
 import Title from './Title';
 
 import InfoIcon from '@mui/icons-material/Info';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+
 import PersonIcon from '@mui/icons-material/Person';
-import axios from 'axios';
+
 import { Divider, Slide, Typography } from '@mui/material';
 import WellHoursChart from './WellHoursChart';
 import { LocalGasStation, OilBarrel } from '@mui/icons-material';
 import Slideshow from './Slideshow';
-import{useSelector} from 'react-redux'
+import { useSelector } from 'react-redux'
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const defaultTheme = createTheme();
-const base_url = process.env.REACT_APP_API_URL
 export default function Dashboard(props) {
+  const axiosPrivate = useAxiosPrivate()
+  const location = useLocation()
   const [userCount, setUserCount] = React.useState([]);
-  const [wellCount, setWellCount] = React.useState([]);
-  const [pobCount,setPObCount] = React.useState([]);
+  const [well, setWell] = React.useState([]);
+  const [pobCount, setPObCount] = React.useState([]);
   const user = useSelector((state) => state.user.user)
+  const navigate = useNavigate()
   React.useEffect(() => {
-    try {
+    let isMounted = true;
+    axiosPrivate.get(`/dashboard`).then((results) => {
+      setUserCount(results.data.userCount)
+      setWell(results.data.well)
+      setPObCount(results.data.POB)
+    }).catch((err) => {
+      console.log('Error: ' + err)
+      navigate('/login', { state: { from: location }, replace: true });
+    })
 
-      axios.get(`${base_url}/dashboard`, {
-        headers: {
-          'authorization': localStorage.getItem('token'),
-        }
-      }).then((results) => {
-        setUserCount(results.data.userCount)
-        setWellCount(results.data.wellCount)
-        setPObCount(results.data.POB)
-      }).catch((err) => {
-        console.log('Error: ' + err)
-      })
-
-
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    return () => {
+      isMounted = false;
+      // controller.abort();
     }
+
   }, []);
   return (
 
@@ -89,12 +89,12 @@ export default function Dashboard(props) {
           </Grid> */}
           <Grid item xs={12} sm={6} md={4}>
             <SmallBoxWidget
-              title="Active wells"
-              value={wellCount}
+              title="Active well"
+              value={well.well_number}
               icon={<InfoIcon sx={{ fontSize: 60 }} />}
               color="success"
-              link="/Well"
-              footerText="Current well details"
+              link={`/Operation/${well._id}`}
+              footerText="View Operations"
             />
           </Grid>
         </Grid>

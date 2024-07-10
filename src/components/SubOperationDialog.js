@@ -13,6 +13,8 @@ import { TextField, Button, Container, Typography, Grid, Divider } from '@mui/ma
 
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchOperationKey ,addSubOperation} from '../redux/actions/operationAction'
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -27,17 +29,20 @@ export default function SubOperationDialog(props) {
   const subOpCode = useSelector((state) => state.operations.SubOperationCode)
   const category = useSelector((state) => state.operations.Category)
   const well = useSelector((state)=> state.operations.well)
+  const token = useSelector((state) => state.user.token)
+  const axiosPrivate = useAxiosPrivate()
+
   // Call fetchData on component mount
   React.useEffect(() => {
-    dispatch(fetchOperationKey('SubOperationCode'))
-    dispatch(fetchOperationKey('Category'))
+    dispatch(fetchOperationKey('SubOperationCode',axiosPrivate))
+    dispatch(fetchOperationKey('Category',axiosPrivate))
   }, []);
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     let data = Object.fromEntries(formData.entries());
     data = { ...data, Operation: props.data.id }
-    dispatch(addSubOperation(data,well))
+    dispatch(addSubOperation(data,well,axiosPrivate))
     handleClose()
     setFormData({
       StartTime: '',

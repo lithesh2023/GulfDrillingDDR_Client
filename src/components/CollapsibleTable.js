@@ -1,5 +1,5 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
+
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -10,7 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
+
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -20,9 +20,9 @@ import OperationDialog from './OperationDialog';
 
 import { useNavigate } from 'react-router-dom';
 import {useDispatch,useSelector} from 'react-redux'
-import {setWell,fetchOperations} from '../redux/actions/operationAction'
-import { FileDownloadDoneSharp, FileDownloadOutlined } from '@mui/icons-material';
-
+import {fetchOperations} from '../redux/actions/operationAction'
+import {FileDownloadOutlined } from '@mui/icons-material';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 
 function Row(props) {
@@ -130,11 +130,12 @@ function Row(props) {
 
 export default function CollapsibleTable() {
 
-  // const [rows, setRows] = React.useState([]);
-  // const [well, setWell] = React.useState(props);
+ 
   const dispatch = useDispatch()
+  const axiosPrivate = useAxiosPrivate()
   const well = useSelector((state)=>state.operations.well)
   const rows = useSelector((state)=>state.operations.operations)
+  
   const navigate = useNavigate()
   const handleClick = () => {
     navigate('/Well')
@@ -142,8 +143,8 @@ export default function CollapsibleTable() {
 
   // Call fetchData on component mount
   React.useEffect(() => {
-    console.log("well",well)
-    dispatch(fetchOperations(well._id))
+    
+    dispatch(fetchOperations(well._id,axiosPrivate))
   }, [dispatch]);
 
   return (

@@ -14,12 +14,11 @@ import {
 } from '@mui/x-data-grid';
 
 import { Box, Container } from '@mui/material';
-import axios from 'axios';
+
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchFuel, addFuel, updateFuel } from '../redux/actions/fuelAction'
 import FuelDialog from './FuelDialog';
-
-
+import { useNavigate, useLocation } from 'react-router-dom';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 function EditToolbar(props) {
 
 
@@ -31,13 +30,17 @@ function EditToolbar(props) {
   );
 }
 
-const base_url = process.env.REACT_APP_API_URL
+
 const FuelRecieved = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const axiosPrivate = useAxiosPrivate()
   const [loading, setLoading] = useState(true);
   const [rowModesModel, setRowModesModel] = React.useState({});
   const fuelData = useSelector((state) => state.fuel.fuel)
   const user = useSelector((state) => state.user.user)
+ 
   const { unit } = user
 
 
@@ -46,7 +49,7 @@ const FuelRecieved = () => {
       event.defaultMuiPrevented = true;
     }
   };
-  const receivedRows = fuelData.fuelRecievedData
+  const receivedRows = fuelData?.fuelRecievedData
   const handleEditClick = (id) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
@@ -56,12 +59,7 @@ const FuelRecieved = () => {
   };
 
   const handleDeleteClick = (id) => async () => {
-    await axios.delete(`${base_url}/employee/${id}`, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    });
-
+    await axiosPrivate.delete(`/employee/${id}`);
   };
 
   const handleCancelClick = (id) => () => {
@@ -78,8 +76,25 @@ const FuelRecieved = () => {
 
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
-
-    newRow.isNew !== true ? dispatch(updateFuel(newRow)) : dispatch(addFuel(newRow))
+    if (newRow.isNew !== true) {
+       axiosPrivate.put(`/fuel/fuelrecieve/${newRow.id}`).catch(err=>{
+        console.error(err)
+        navigate('/login',{state:{from:location},replace:true})
+      })
+    }
+    else {
+       axiosPrivate.post(`/fuel/add`, newRow).catch(err=>{
+        console.error(err)
+        navigate('/login',{state:{from:location},replace:true})
+      })
+    }
+    axiosPrivate.get(`/fuel`).then((response)=>{
+      dispatch({ type: 'FETCH_FUEL', payload: response.data });
+    }).catch(err=>{
+      console.error(err)
+      navigate('/login',{state:{from:location},replace:true})
+    })
+    
     return updatedRow;
   };
 
@@ -145,8 +160,14 @@ const FuelRecieved = () => {
     },
   ];
   useEffect(() => {
-    dispatch(fetchFuel())
-    setLoading(false)
+
+    axiosPrivate.get(`/fuel`).then((response) => {
+      dispatch({ type: 'FETCH_FUEL', payload: response.data });
+    }).catch(err => {
+      navigate('/login', { state: { from: location }, replace: true });
+    }).finally(() => {
+      setLoading(false)
+    })
   }, [dispatch]);
 
   return (
@@ -168,7 +189,7 @@ const FuelRecieved = () => {
           <Grid container spacing={2}>
             <Grid item xs={6} md={12}>
               <Typography component="h2" variant="h5" color="primary" gutterBottom>
-                Fuel Filling Tracker - {unit}
+                Fuel Reception Tracker - {unit}
               </Typography>
             </Grid>
           </Grid>
@@ -178,7 +199,7 @@ const FuelRecieved = () => {
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5, 10, 20]}
-
+          loading={loading}
           editMode="row"
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
@@ -237,7 +258,7 @@ const FuelRecieved = () => {
             },
           }}
         />
-      
+
       </Box>
 
     </Container>

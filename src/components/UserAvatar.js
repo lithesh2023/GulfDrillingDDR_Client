@@ -19,7 +19,7 @@ const UserAvatar = () => {
     };
     const logout =()=>{
         dispatch(setUser({}))
-        localStorage.setItem('token', "");
+        
     }
     const openProfile = () => {
         navigate('/Profile')

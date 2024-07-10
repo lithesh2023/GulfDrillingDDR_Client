@@ -14,7 +14,7 @@ import OilRigIcon from './OilRigIcon';
 import { LocalGasStation, OilBarrelTwoTone } from '@mui/icons-material';
 export const mainListItems = (
   <React.Fragment>
-    <Link to="/Dashboard" style={{ textDecoration: 'none' }}>
+    <Link to="/" style={{ textDecoration: 'none' }}>
       <ListItemButton>
         <ListItemIcon>
           <DashboardIcon />

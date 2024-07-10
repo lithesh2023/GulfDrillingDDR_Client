@@ -12,6 +12,7 @@ import { TextField, Button, Container, Typography, Grid } from '@mui/material'
 import { Add } from '@mui/icons-material';
 import {useDispatch,useSelector} from 'react-redux'
 import {addOperation,fetchOperationKey} from '../redux/actions/operationAction'
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -29,7 +30,7 @@ export default function OperationDialog(props) {
     let data = Object.fromEntries(formData.entries());
     data = {...data,well:props.id}
     
-    dispatch(addOperation(data))
+    dispatch(addOperation(data,useAxiosPrivate))
     handleClose()
     setFormData({
       StartDate: '',
@@ -53,13 +54,14 @@ export default function OperationDialog(props) {
     createdBy: '',
     well: '',
   });
-  
+  const axiosPrivate = useAxiosPrivate()
   const operationCode = useSelector((state)=> state.operations.mainOperationCode)
+  const token = useSelector((state) => state.user.token)
   const today = new Date().toISOString().split('T')[0];
 
   // Call fetchData on component mount
   React.useEffect(() => {
-    dispatch(fetchOperationKey('mainOperationCode'))
+    dispatch(fetchOperationKey('mainOperationCode',axiosPrivate))
   }, [dispatch]);
   const handleClickOpen = () => {
     setOpen(true);

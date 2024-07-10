@@ -19,13 +19,18 @@ import {
     randomId,
 } from '@mui/x-data-grid-generator';
 import { Box, Container } from '@mui/material';
-import axios from 'axios';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { fetchCrew, fetchDesignations } from '../redux/actions/crewActions';
 function EditToolbar(props) {
-    const { setUsers, setRowModesModel } = props;
+    const {users,dispatch, setRowModesModel } = props;
 
     const handleClick = () => {
-        const id = randomId();
-        setUsers((oldRows) => [...oldRows, { id, Name: '', Designation: '', empNumber: '', crew: '', unit: '', isNew: true }]);
+        const id = randomId()
+        dispatch({ type: 'FETCH_CREW', payload:[...users,{ id, Name: '', Designation: '', empNumber: '', crew: '', unit: '', isNew: true }] });
+       
         setRowModesModel((oldModel) => ({
             ...oldModel,
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
@@ -42,17 +47,25 @@ function EditToolbar(props) {
     );
 }
 
-const base_url = process.env.REACT_APP_API_URL
+
 const CrewList = () => {
-    const [users, setUsers] = useState([]);
+
+    // const [users, setUsers] = useState([]);
+    let users = useSelector(state => state.crew.crew)
+
+    const designations = useSelector(state => state.crew.designations)
+    const dispatch = useDispatch()
     const [loading, setLoading] = useState(true);
     const [rowModesModel, setRowModesModel] = React.useState({});
-    const [designations, setDesignations] = React.useState([])
+    //const [designations, setDesignations] = React.useState([])
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
         }
     };
+    const axiosPrivate = useAxiosPrivate()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const handleEditClick = (id) => () => {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -63,12 +76,12 @@ const CrewList = () => {
     };
 
     const handleDeleteClick = (id) => async () => {
-        await axios.delete(`${base_url}/employee/${id}`, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        });
-        setUsers(users.filter((row) => row.id !== id));
+        axiosPrivate.delete(`/employee/${id}`).then(() => {
+           dispatch(fetchCrew(axiosPrivate))
+        }).catch(err => {
+            navigate('/login', { state: { from: location }, replace: true });
+        })
+
     };
 
     const handleCancelClick = (id) => () => {
@@ -79,22 +92,24 @@ const CrewList = () => {
 
         const editedRow = users.find((row) => row.id === id);
         if (editedRow.isNew) {
-            setUsers(users.filter((row) => row.id !== id));
+            dispatch(fetchCrew(axiosPrivate))
         }
     };
 
     const processRowUpdate = async (newRow) => {
         const updatedRow = { ...newRow, isNew: false };
-        setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
-        newRow.isNew !== true ? await axios.put(`${base_url}/employee/${newRow.id}`, newRow, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        }) : await axios.post(`${base_url}/employee`, newRow, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        })
+       
+        try {
+            if (newRow.isNew !== true) { await axiosPrivate.put(`/employee/${newRow.id}`, newRow) }
+            else { await axiosPrivate.post(`/employee`, newRow) }
+
+            dispatch(fetchCrew(axiosPrivate))
+        }
+
+        catch (err) {
+            console.error(err)
+            navigate('/login', { state: { from: location }, replace: true });
+        }
         return updatedRow;
     };
 
@@ -161,29 +176,11 @@ const CrewList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get(`${base_url}/employee/`, {
-                    headers: {
-                        'authorization': localStorage.getItem('token'),
-                    }
-                });
-
-                const employeeData = response?.data?.employees?.map((employee) => ({
-                    id: employee._id,
-                    Name: employee.Name,
-                    empNumber: employee.empNumber,
-                    Designation: employee.Designation,
-                    crew: employee.crew
-                }));
-                setUsers(employeeData);
-
-                const res = await axios.get(`${base_url}/key/designation`, {
-                    headers: {
-                        'authorization': localStorage.getItem('token'),
-                    }
-                });
-                setDesignations(res.data[0].values)
+                dispatch(fetchCrew(axiosPrivate));
+                dispatch(fetchDesignations(axiosPrivate))
             } catch (error) {
                 console.error('Error fetching user data:', error);
+                navigate('/login', { state: { from: location }, replace: true });
             } finally {
                 setLoading(false);
             }
@@ -216,7 +213,7 @@ const CrewList = () => {
                     </Grid>
                 </Box>
                 <DataGrid
-                    rows={users}
+                    rows={users?users:[]}
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5, 10, 20]}
@@ -230,7 +227,7 @@ const CrewList = () => {
                         toolbar: EditToolbar,
                     }}
                     slotProps={{
-                        toolbar: { setUsers, setRowModesModel },
+                        toolbar: { users,dispatch,setRowModesModel },
                     }}
                     sx={{
 

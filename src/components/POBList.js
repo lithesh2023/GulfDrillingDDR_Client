@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
+
 import { Grid, Typography } from '@mui/material';
 import {
     GridRowModes,
@@ -17,15 +16,17 @@ import {
     randomId,
 } from '@mui/x-data-grid-generator';
 import { Box, Container } from '@mui/material';
-import axios from 'axios';
 import POBDialog from './POBDialog';
+import { useSelector,useDispatch } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { fetchPOBCrew } from '../redux/actions/crewActions';
 
 function EditToolbar(props) {
-    const { setUsers, setRowModesModel } = props;
+    const {  setRowModesModel } = props;
 
     const handleClick = () => {
         const id = randomId();
-        setUsers((oldRows) => [...oldRows, { id, Name: '', Designation: '', empNumber: '', crew: '', unit: '', isNew: true }]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
@@ -40,9 +41,13 @@ function EditToolbar(props) {
     );
 }
 
-const base_url = process.env.REACT_APP_API_URL
+
 const POBList = () => {
-  
+    const dispatch = useDispatch()
+    const axiosPrivate = useAxiosPrivate()
+    const navigate = useNavigate()
+    const location = useLocation()
+   const users = useSelector(state => state.crew.pob_crew)
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', {
         weekday: 'long',
@@ -50,7 +55,7 @@ const POBList = () => {
         month: 'long',
         day: 'numeric',
     });
-    const [users, setUsers] = useState([]);
+    // const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [rowModesModel, setRowModesModel] = React.useState({});
     const [designations, setDesignations] = React.useState([])
@@ -66,12 +71,16 @@ const POBList = () => {
     };
 
     const handleDeleteClick = (id) => async () => {
-        await axios.put(`${base_url}/employee/${id}`, { POBDate: '', unit: '' }, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        });
-        setUsers(users.filter((row) => row.id !== id));
+        try {
+            await axiosPrivate.put(`/employee/${id}`, { POBDate: '', unit: '' }, {
+
+            });
+           
+        }
+        catch (error) {
+            console.log('Error: ' + error)
+            navigate('/login', { state: { from: location }, replace: true });
+        }
     };
 
     const handleCancelClick = (id) => () => {
@@ -82,23 +91,23 @@ const POBList = () => {
 
         const editedRow = users.find((row) => row.id === id);
         if (editedRow.isNew) {
-            setUsers(users.filter((row) => row.id !== id));
+            // setUsers(users.filter((row) => row.id !== id));
+           
         }
     };
 
     const processRowUpdate = async (newRow) => {
-        const updatedRow = { ...newRow, isNew: false };
-        setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
-        newRow.isNew !== true ? await axios.put(`${base_url}/employee/${newRow.empNumber}`, newRow, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        }) : await axios.post(`${base_url}/employee`, newRow, {
-            headers: {
-                'authorization': localStorage.getItem('token'),
-            }
-        })
-        return updatedRow;
+        try {
+            const updatedRow = { ...newRow, isNew: false };
+            // setUsers(users.map((row) => (row.id === newRow.id ? updatedRow : row)));
+            newRow.isNew !== true ? await axiosPrivate.put(`/employee/${newRow.empNumber}`, newRow) : await axiosPrivate.post(`/employee`, newRow)
+            dispatch(fetchPOBCrew(axiosPrivate))
+            return updatedRow;
+        }
+        catch (error) {
+            console.log('Error: ' + error)
+            navigate('/login', { state: { from: location }, replace: true });
+        }
     };
 
     const handleRowModesModelChange = (newRowModesModel) => {
@@ -107,7 +116,7 @@ const POBList = () => {
     const columns = [
 
         {
-            field: 'Name', headerName: 'Name', editable: false, width: 150, 
+            field: 'Name', headerName: 'Name', editable: false, width: 150,
         },
         { field: 'empNumber', headerName: 'Employee Number', editable: false, width: 150 },
         {
@@ -167,37 +176,19 @@ const POBList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get(`${base_url}/employee/POB`, {
-                    headers: {
-                        'authorization': localStorage.getItem('token'),
-                    }
-                });
-
-                const employeeData = response?.data?.employees?.map((employee) => ({
-                    id: employee._id,
-                    Name: employee.Name,
-                    empNumber: employee.empNumber,
-                    Designation: employee.Designation,
-                    unit: employee.unit,
-                    crew: employee.crew,
-                    POBDate: employee.POBDate
-                }));
-                setUsers(employeeData);
-
-                const res = await axios.get(`${base_url}/key/designation`, {
-                    headers: {
-                        'authorization': localStorage.getItem('token'),
-                    }
-                });
+                dispatch(fetchPOBCrew(axiosPrivate))
+                const res = await axiosPrivate.get(`/key/designation`);
                 setDesignations(res.data[0].values)
             } catch (error) {
                 console.error('Error fetching user data:', error);
+                navigate('/login', { state: { from: location }, replace: true });
+
             } finally {
                 setLoading(false);
             }
         };
         fetchUsers();
-    }, []);
+    }, [dispatch]);
 
     return (
         <Container>
@@ -225,7 +216,7 @@ const POBList = () => {
                     </Grid>
                 </Box>
                 <DataGrid
-                    rows={users}
+                    rows={users?users:[]}
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5, 10, 20]}
@@ -239,7 +230,7 @@ const POBList = () => {
                         toolbar: EditToolbar,
                     }}
                     slotProps={{
-                        toolbar: { setUsers, setRowModesModel },
+                        toolbar: {setRowModesModel },
                     }}
                     sx={{
 

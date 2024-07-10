@@ -2,16 +2,12 @@ import axios from "axios";
 
 const base_url = process.env.REACT_APP_API_URL
 
-export const fetchOperations = (id) => {
+export const fetchOperations = (id,axiosPrivate) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
-            const response = await axios.get(`${base_url}/operation${id ? '/' + id : ''}`, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
-            console.log("Operations",response.data)
+            const response = await axiosPrivate.get(`/operation${id ? '/' + id : ''}`)
+           
             dispatch({ type: 'FETCH_OPERATIONS', payload: response.data });
 
         } catch (error) {
@@ -19,15 +15,11 @@ export const fetchOperations = (id) => {
         }
     };
 };
-export const fetchOperationKey = (key) => {
+export const fetchOperationKey = (key,axiosPrivate) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
-            const response = await axios.get(`${base_url}/key/${key}`, {
-                headers: {
-                  'authorization': localStorage.getItem('token'),
-                }
-              });
+            const response = await axiosPrivate.get(`/key/${key}`);
 
             dispatch({ type: `FETCH_OPERATION_${key}`, payload: response.data[0].values });
 
@@ -38,19 +30,11 @@ export const fetchOperationKey = (key) => {
 };
 
 
-export const addOperation = (data) => {
+export const addOperation = (data,axiosPrivate) => {
     return async (dispatch) => {
         try {
-             await axios.post(`${base_url}/operation`,data, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
-            const response = await axios.get(`${base_url}/operation${data.well ? '/' + data.well : ''}`, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
+             await axiosPrivate.post(`${base_url}/operation`,data)
+            const response = await axiosPrivate.get(`${base_url}/operation${data.well ? '/' + data.well : ''}`)
             dispatch({ type: 'FETCH_OPERATIONS', payload: response.data });
 
         } catch (error) {
@@ -59,15 +43,11 @@ export const addOperation = (data) => {
     };
 };
 
-export const setWell = (id) => {
+export const setWell = (id,axiosPrivate) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
-            const response = await axios.get(`${base_url}/well/${id}`, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
+            const response = await axiosPrivate.get(`/well/${id}`)
             
             dispatch({ type: 'SET_WELL', payload: response.data });
 
@@ -77,15 +57,11 @@ export const setWell = (id) => {
     };
 };
 
-export const fetchSubOperations = (key) => {
+export const fetchSubOperations = (key,axiosPrivate) => {
     return async (dispatch) => {
         dispatch({ type: 'FETCH_DATA_REQUEST' });
         try {
-            const response = await axios.get(`${base_url}/sub-operation/${key}`, {
-                headers: {
-                  'authorization': localStorage.getItem('token'),
-                }
-              });
+            const response = await axiosPrivate.get(`/sub-operation/${key}`);
 
             dispatch({ type: `FETCH_SUB_OPERATIONS`, payload: response.data[0].values });
 
@@ -95,20 +71,12 @@ export const fetchSubOperations = (key) => {
     };
 };
 
-export const addSubOperation = (data,well) => {
-    console.log("well in action",well)
+export const addSubOperation = (data,well,axiosPrivate) => {
+   
     return async (dispatch) => {
         try {
-             await axios.post(`${base_url}/sub-operation`,data, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
-            const response = await axios.get(`${base_url}/operation${well?._id ? '/' + well._id : ''}`, {
-                headers: {
-                    'authorization': localStorage.getItem('token'),
-                }
-            })
+             await axiosPrivate.post(`/sub-operation`,data)
+            const response = await axiosPrivate.get(`${base_url}/operation${well?._id ? '/' + well._id : ''}`)
             dispatch({ type: 'FETCH_OPERATIONS', payload: response.data });
 
         } catch (error) {

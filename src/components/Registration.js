@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
-import axios from 'axios'
+import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-const base_url = process.env.REACT_APP_API_URL
+
 const Registration = () => {
+
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstname: '',
@@ -29,11 +31,7 @@ const Registration = () => {
 
 
     // const data = Object.fromEntries(formData.entries());
-    await axios.post(`${base_url}/user/register`, formData, {
-      headers: {
-        'authorization': localStorage.getItem('token'),
-      }
-    })
+    await axios.post(`/user/register`, formData)
     navigate('/Login')
     setFormData({
       firstname: '',
@@ -59,6 +57,7 @@ const Registration = () => {
             value={formData.firstname}
             onChange={handleChange}
             size='small'
+            required
           />
           <TextField
             label="Last Name"
@@ -69,6 +68,7 @@ const Registration = () => {
             value={formData.lastname}
             onChange={handleChange}
             size='small'
+            required
           />
           <TextField
             label="Email"
@@ -79,6 +79,7 @@ const Registration = () => {
             value={formData.email}
             onChange={handleChange}
             size='small'
+            required
           />
           <TextField
             label="Phone Number"
@@ -89,6 +90,7 @@ const Registration = () => {
             value={formData.phone}
             onChange={handleChange}
             size='small'
+            required
           />
           <TextField
             label="Password"
@@ -100,6 +102,7 @@ const Registration = () => {
             value={formData.password}
             onChange={handleChange}
             size='small'
+            required
           />
           <TextField
             label="Confirm Password"
@@ -111,6 +114,7 @@ const Registration = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             size='small'
+            required
           />
           <Button
             type="submit"

@@ -1,13 +1,14 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { useParams } from 'react-router-dom';
-
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import DetailPanelDataGrid from './CollapsibleTable'
 import { useDispatch, useSelector } from 'react-redux'
 import { setWell } from '../redux/actions/operationAction';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
@@ -23,10 +24,10 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function Operation() {
   const { id } = useParams();
   const dispatch = useDispatch()
-  
-  
+
+  const axiosPrivate = useAxiosPrivate()
   React.useEffect(() => {
-    dispatch(setWell(id))
+    dispatch(setWell(id,axiosPrivate))
   }, [dispatch]);
   const well = useSelector((state) => state.operations.well)
   const store = useSelector((state)=>state)
